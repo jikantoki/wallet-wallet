@@ -112,7 +112,7 @@ v-card(
         style="background-color: rgb(var(--v-theme-primary)); color: white;"
         ref="submitButton"
         prepend-icon="mdi-check"
-        @click="addCardList(card)"
+        @click="addCardList(editCard)"
       ) 登録
 </template>
 

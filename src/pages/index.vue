@@ -8,27 +8,26 @@ v-card(
       p Wallet Wallet
     v-spacer
   v-card-text(style="height: inherit; overflow-y: auto;")
-    .wrap.my-4
-      v-btn(
-        @click="a('https://github.com/jikantoki/wallet-wallet')"
-        style="background-color: rgb(var(--v-theme-primary)); color: white;"
-        ) Github
-    .wrap
-      v-card.content(elevation="4")
-        .text-h4 綺麗で美しい
-        hr
-        .text NuxTempで理想の作業効率化
-        v-btn(
-          @click="$router.push('create')"
-          style="background-color: rgb(var(--v-theme-primary)); color: white;"
-        ) カードを登録
-    .wrap
-      v-card.content(elevation="4")
-        .text-h4 画像だって表示可能
-        hr
-        p このコンポーネントを使えば、エモい感じで画像を簡単に表示できます
-        .img-wrap.my-4
-          img.big-img(src="/icon.png" height="128")//-- 下部のアクションバー --
+    h2 カードリスト（{{ cards.cards.length }}枚）
+    .settings-list.my-4(
+      v-for="(card, cnt) of cards.cards"
+      lines="three"
+      )
+      .setting-item(
+        @click="detailDialogTarget = cnt;detailDialog = true;"
+        v-ripple
+        )
+        .icon
+          v-icon mdi-cards
+        .text
+          h3(
+            style="font-size: 1.2em;"
+          ) {{ card.name }}
+          p {{ searchBrand(card.cardNumber) ?? '不明なブランド' }} ******{{ card.cardNumber.slice(-4) }}
+          p.opacity05(
+            style="min-height: 1em;"
+            ) {{ card.memo.length ? card.memo : '空白のメモ' }}
+  //-- 下部のアクションバー --
   .action-bar
     .buttons
       .button(
@@ -39,6 +38,12 @@ v-card(
         p トップ
       .button(
         v-ripple
+        @click="$router.push('/create')"
+        )
+        v-icon mdi-pencil-plus
+        p 追加
+      .button(
+        v-ripple
         @click="optionsDialog = true"
         style="opacity: 0.8;"
         )
@@ -46,15 +51,15 @@ v-card(
         p その他
     .bottom-android-15-or-higher(v-if="settings.hidden.isAndroid15OrHigher")
   //-- 右下のボタン --
-  //- .right-bottom-buttons
+  .right-bottom-buttons
     .current-button
       v-btn(
         size="x-large"
         icon
-        @click=""
+        @click="$router.push('/create')"
         style="background-color: rgb(var(--v-theme-primary)); color: white"
         )
-        v-icon mdi-crosshairs-gps
+        v-icon mdi-pencil-plus
   //-- 左上の友達リストボタン --
   //- .left-top-buttons
     .top-android-15-or-higher(v-if="settings.hidden.isAndroid15OrHigher")
@@ -162,33 +167,33 @@ v-card(
               ) ログインしていません
             p(style="margin: 0; padding: 0;")
               | {{ myProfile.userId && !myProfile.guest ? `@${myProfile.userId}` : 'データは同期されていません' }}
-            v-btn.my-2(
+            //v-btn.my-2(
               v-if="myProfile.userId && !myProfile.guest"
               text
               @click="$router.push(`/user/${myProfile.userId}`)"
               append-icon="mdi-account-outline"
               style="background-color: rgb(var(--v-theme-primary));"
-            ) プロフィールを表示
-            v-btn.my-2(
+              ) プロフィールを表示
+            //v-btn.my-2(
               v-else
               text
               @click="$router.push('/login')"
               append-icon="mdi-login"
               style="background-color: rgb(var(--v-theme-primary)); color: white;"
-            ) ログイン
+              ) ログイン
         v-list.options-list
-          v-list-item.item( @click="searchFriendDialog = true" )
+          //v-list-item.item( @click="searchFriendDialog = true" )
             .icon-and-text
               v-icon mdi-magnify
               v-list-item-title 友達を探す
-          v-list-item.item( @click="$router.push('qrcode')" )
+          //v-list-item.item( @click="$router.push('qrcode')" )
             .icon-and-text
               v-icon mdi-qrcode-scan
               v-list-item-title QRコードで友達を探す
-          v-list-item.item(
+          //v-list-item.item(
             @click="$router.push('/friendlist')"
             v-show="myProfile && myProfile.userId"
-          )
+            )
             .icon-and-text
               v-icon mdi-account-multiple
               v-list-item-title 友達リスト
@@ -208,10 +213,95 @@ v-card(
             .icon-and-text
               v-icon mdi-information
               v-list-item-title このアプリについて
+          v-list-item.item( @click="share('https://play.google.com/store/apps/dev?id=8940000495375956936', 'エノキ電気')" )
+            .icon-and-text
+              v-icon mdi-share-variant
+              v-list-item-title このアプリを共有する
   v-dialog(
+    v-model="detailDialog"
+    )
+    v-card(
+      v-for="card in [cards.cards[detailDialogTarget]]"
+      width="100%"
+    )
+      v-card-title カード情報
+      v-card-text
+        v-text-field(
+          v-model="card.name"
+          label="カード名"
+          prepend-inner-icon="mdi-tag"
+          readonly
+          )
+          template(v-slot:append-inner)
+            v-icon(@click.stop="copy(card.name)") mdi-content-copy
+        v-text-field(
+          v-model="card.cardNumber"
+          label="カード番号（16桁）"
+          prepend-inner-icon="mdi-credit-card"
+          readonly
+          )
+          template(v-slot:append-inner)
+            v-icon(@click.stop="copy(card.cardNumber)") mdi-content-copy
+        v-text-field(
+          v-model="detailDialogTargetBrand"
+          label="ブランド"
+          prepend-inner-icon="mdi-cards"
+          readonly
+          )
+          template(v-slot:append-inner)
+            v-icon(@click.stop="copy(card.cardNumber)") mdi-content-copy
+        p 有効期限
+        .deadline(
+          style="display: flex; gap: 16px;"
+          )
+          v-text-field(
+            v-model="card.deadlineMM"
+            label="月（MM）"
+            readonly
+            )
+            template(v-slot:append-inner)
+              v-icon(@click.stop="copy(card.deadlineMM)") mdi-content-copy
+          v-text-field(
+            v-model="card.deadlineYYYY"
+            label="年（YYもしくはYYYY）"
+            readonly
+            )
+            template(v-slot:append-inner)
+              v-icon(@click.stop="copy(card.deadlineYYYY)") mdi-content-copy
+        v-text-field(
+          v-model="card.cvc"
+          label="CVC"
+          prepend-inner-icon="mdi-form-textbox-password"
+          readonly
+          )
+          template(v-slot:append-inner)
+            v-icon(@click.stop="copy(card.cvc)") mdi-content-copy
+        v-text-field(
+          v-model="card.ownName"
+          label="名義"
+          prepend-inner-icon="mdi-account"
+          readonly
+          )
+          template(v-slot:append-inner)
+            v-icon(@click.stop="copy(card.ownName)") mdi-content-copy
+        v-text-field(
+          v-model="card.memo"
+          label="メモ"
+          prepend-inner-icon="mdi-note-outline"
+          readonly
+          )
+          template(v-slot:append-inner)
+            v-icon(@click.stop="copy(card.memo)") mdi-content-copy
+      v-card-actions
+        v-btn(
+          prepend-icon="mdi-close"
+          style="background-color: rgb(var(--v-theme-primary)); color: white;"
+          @click="detailDialog = false"
+        ) 閉じる
+  //v-dialog(
     v-model="acceptDialog"
     persistent
-  )
+    )
     v-card
       v-card-title 友達リクエストが来ています！
       v-card-text
@@ -229,10 +319,13 @@ v-card(
 <script lang="ts">
   import { App } from '@capacitor/app'
   import { Browser } from '@capacitor/browser'
-  import { Toast } from '@capacitor/toast'
 
+  import { Clipboard } from '@capacitor/clipboard'
+  import { Share } from '@capacitor/share'
+  import { Toast } from '@capacitor/toast'
   // @ts-ignore
   import mixins from '@/mixins/mixins'
+  import { useCardsStore } from '@/stores/cards'
   import { useMyProfileStore } from '@/stores/myProfile'
   import { useSettingsStore } from '@/stores/settings'
 
@@ -265,9 +358,25 @@ v-card(
         friendList: [] as any[],
         /** 設定ストア */
         settings: useSettingsStore(),
+        cards: useCardsStore(),
+        /** カード情報詳細ダイアログ */
+        detailDialog: false,
+        detailDialogTarget: null as number | null,
       }
     },
-    computed: {},
+    computed: {
+      detailDialogTargetBrand () {
+        if (this.detailDialogTarget == null
+        ) {
+          return false
+        }
+        const cardNumber = this.cards.cards[this.detailDialogTarget]?.cardNumber
+        if (cardNumber == undefined) {
+          return false
+        }
+        return this.searchBrand(cardNumber) ?? '不明なブランド'
+      },
+    },
     watch: {
       /** ようこそ画面の表示状態を保存 */
       optionsDialog: {
@@ -315,6 +424,9 @@ v-card(
         } else if (this.optionsDialog) {
           /** オプションダイアログを閉じる */
           this.optionsDialog = false
+        } else if (this.detailDialog) {
+          /** 編集ダイアログを閉じる */
+          this.detailDialog = false
         } else if (this.$route.path === '/') {
           /** ルートページならアプリを最小化 */
           App.minimizeApp()
@@ -351,6 +463,11 @@ v-card(
       App.removeAllListeners()
     },
     methods: {
+      async copy (content: string) {
+        await Clipboard.write({
+          string: content,
+        })
+      },
       /** 秒比較 */
       diffSeconds (date: Date | null | undefined) {
         if (!date) {
@@ -425,6 +542,13 @@ v-card(
         // 10秒 = 10000ミリ秒
         const diffInMilliseconds = Math.abs(date1.getTime() - date2.getTime())
         return diffInMilliseconds <= 10_000
+      },
+      /** シェアダイアログ */
+      async share (content: string, title = '') {
+        await Share.share({
+          url: content,
+          title: title,
+        })
       },
     },
   }
@@ -569,4 +693,44 @@ v-card(
 .opacity05 {
   opacity: 0.7;
 }
+
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  .setting-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1em;
+    padding: 1em;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all .2s;
+    &:hover {
+      background-color: rgba(var(--v-theme-primary), 0.1);
+    }
+    .icon {
+      background: rgba(var(--v-theme-on-surface), 0.1);
+      border-radius: 50%;
+      width: 40px;
+      min-width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .text {
+      .title {
+        font-weight: bold;
+        font-size: 1.1em;
+      }
+      .description {
+        font-size: 0.9em;
+        color: #666;
+      }
+    }
+  }
+}
+
 </style>
