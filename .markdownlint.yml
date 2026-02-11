@@ -1,0 +1,48 @@
+# Docs
+# https://github.com/DavidAnson/markdownlint/blob/a852407c887ec60949aa5365ed964bab833f962f/doc/Rules.md
+
+# MD002/first-heading-h1/first-header-h1 - First heading should be a top-level heading
+# チェック不要。そのうちデフォルトで false になるらしいがバージョンによるのでとりあえず明示的に設定
+MD002: false
+
+# MD012/no-multiple-blanks - Multiple consecutive blank lines
+# 2行以上の空行があるとコケる。これも表示に影響はないのでスルーする。
+MD012: true
+
+# MD013/line-length - Line length
+# 1行の表示上限チェックは不要。
+MD013: false
+
+# MD022/blanks-around-headings/blanks-around-headers - Headings should be surrounded by blank lines
+# ヘディングの上下にスペースがないとエラーになる。Hexoでの表示に影響ないのでそこまでチェックしない。
+MD022: true
+
+# MD026/no-trailing-punctuation - Trailing punctuation in heading
+# 見出しに句読点があっても別に構わないのでfalse
+MD026:
+
+# MD031/blanks-around-fences - Fenced code blocks should be surrounded by blank lines
+# コードブロックの上下に空白行がないと怒られます。特にウチでは表示に影響ないのでチェックしない
+MD031: true
+
+# MD033/no-inline-html - Inline HTML
+# インラインHTMLは許可するのでfalse
+MD033: false
+
+# MD034/no-bare-urls - Bare URL used
+# ハイパーリンクに変換されて困るURLは自分でエスケープ済みなのでここではチェック不要
+# 入れたい人は入れても良い
+MD034: false
+
+# MD036/no-emphasis-as-heading/no-emphasis-as-header - Emphasis used instead of a heading
+# 見出しのかわりに強調表示を使うと怒られる
+# ただ、見出しを使いたくない場合もあるのでチェックしない
+MD036:
+
+# MD041/first-line-heading/first-line-h1 - First line in a file should be a top-level heading
+# ウチではh1はサイト名に使われているのでチェックしない
+MD041: false
+
+# MD043/required-headings/required-headers - Required heading structure
+# 見出しの構造なんて記事によって変わるのでチェックしない
+MD043: false
