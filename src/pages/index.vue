@@ -10,7 +10,7 @@ v-card(
   v-card-text(style="height: inherit; overflow-y: auto;")
     .wrap.my-4
       v-btn(
-        @click="a('https://github.com/jikantoki/wallet')"
+        @click="a('https://github.com/jikantoki/wallet-wallet')"
         style="background-color: rgb(var(--v-theme-primary)); color: white;"
         ) Github
     .wrap
@@ -18,6 +18,10 @@ v-card(
         .text-h4 綺麗で美しい
         hr
         .text NuxTempで理想の作業効率化
+        v-btn(
+          @click="$router.push('create')"
+          style="background-color: rgb(var(--v-theme-primary)); color: white;"
+        ) カードを登録
     .wrap
       v-card.content(elevation="4")
         .text-h4 画像だって表示可能

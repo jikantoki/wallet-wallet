@@ -7,6 +7,8 @@ import ajaxFunctions from '@/js/ajaxFunctions'
 // import Functions from '~/js/Functions'
 import PackageJson from '../../package.json'
 
+export type Brands = null | 'JCB' | 'Diners' | 'AMEX' | 'VISA' | 'MasterCard'
+
 export default defineComponent({
   components: {},
   data () {
@@ -46,6 +48,48 @@ export default defineComponent({
     this.env = import.meta.env
   },
   methods: {
+    searchBrand (cardNumber: string): Brands {
+      // 先頭2文字はカード番号が0の場合があるので削除
+      if (cardNumber.slice(0, 1) == '0') {
+        cardNumber = cardNumber.slice(1, 15)
+        if (cardNumber.slice(0, 1) == '0') {
+          cardNumber = cardNumber.slice(1, 14)
+        }
+      }
+      /** クレカ番号の先頭文字 */
+      const firstString = cardNumber.slice(0, 1)
+      switch (Number(firstString)) {
+        case 3: {
+          /** クレカ番号の先頭2文字 */
+          const secondString = cardNumber.slice(0, 2)
+          switch (Number(secondString)) {
+            case 35: {
+              return 'JCB'
+            }
+            case 36: {
+              return 'Diners'
+            }
+            case 34:
+            case 37: {
+              return 'AMEX'
+            }
+            default: {
+              return null
+            }
+          }
+        }
+        case 4: {
+          return 'VISA'
+        }
+        case 2:
+        case 5: {
+          return 'MasterCard'
+        }
+        default: {
+          return null
+        }
+      }
+    },
     sendAjax: ajaxFunctions.send,
     /**
      * APIトークンを同時に送信するAjax（内部処理用）
@@ -63,6 +107,9 @@ export default defineComponent({
      * @param {bool} isPost true（デフォ）ならPOST、falseでGET
      */
     sendAjaxWithAuth (url: string, header = null as any, sendObject = null as any, isPost = true) {
+      if (!this.env.VUE_APP_API_HOST) {
+        return null
+      }
       const authHeader = {
         apiid: this.env.VUE_APP_API_ID,
         apitoken: this.env.VUE_APP_API_TOKEN,

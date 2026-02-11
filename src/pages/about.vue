@@ -26,7 +26,7 @@ v-card(
         v-btn.mr-2(
           text
           append-icon="mdi-github"
-          @click="openURL('https://github.com/jikantoki/wallet')"
+          @click="openURL('https://github.com/jikantoki/wallet-wallet')"
         ) Github
         v-btn.ml-2(
           text
