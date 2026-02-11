@@ -1,4 +1,4 @@
-package xyz.enoki.capacitor.template;
+package xyz.enoki.wallet;
 
 import com.getcapacitor.BridgeActivity;
 

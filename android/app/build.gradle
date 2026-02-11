@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "xyz.enoki.capacitor.template"
+    namespace = "xyz.enoki.wallet"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "xyz.enoki.capacitor.template"
+        applicationId "xyz.enoki.wallet"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

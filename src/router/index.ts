@@ -43,7 +43,7 @@ App.addListener('appUrlOpen', function (event: URLOpenListenerEvent) {
   if (slug.startsWith('/user/')) {
     router.push(slug)
   } else if (slug) {
-    Browser.open({ url: `https://capacitor-template.enoki.xyz${slug}` })
+    Browser.open({ url: `https://wallet.enoki.xyz${slug}` })
   } else {
     Toast.show({ text: '対応する動作が見つかりませんでした。' })
   }

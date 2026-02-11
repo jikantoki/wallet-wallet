@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "xyz.enoki.capacitor.template",
+  "applicationId": "xyz.enoki.wallet",
   "variantName": "release",
   "elements": [
     {

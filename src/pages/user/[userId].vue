@@ -71,7 +71,7 @@
     //-.createdat.mx-2(v-show="!loading")
       p(
         v-if="userData && userData.status != 'ng'"
-        ) {{ new Date(userData.createdAt * 1000) }}からCapacitor Templateを利用しています
+        ) {{ new Date(userData.createdAt * 1000) }}からWallet Walletを利用しています
     //.share-and-sns-links.px-2(v-show="userData")
       .share-buttons
         v-btn.mx-2(
@@ -274,7 +274,7 @@ v-dialog(v-model="followDialogMessage")
         this.userData = JSON.parse(localUserData)
       }
 
-      this.myLink = `https://capacitor-template.enoki.xyz/user/${userId}?openExternalBrowser=1`
+      this.myLink = `https://wallet.enoki.xyz/user/${userId}?openExternalBrowser=1`
 
       setTimeout(() => {
         const canvas = document.querySelector('#qr-canvas') as HTMLCanvasElement
@@ -385,7 +385,7 @@ v-dialog(v-model="followDialogMessage")
         //   string: content,
         // })
         await Share.share({
-          title: 'Capacitor Templateで位置情報を共有しよう',
+          title: 'Wallet Walletで位置情報を共有しよう',
           url: content,
         })
       },

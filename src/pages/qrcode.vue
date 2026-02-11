@@ -146,7 +146,7 @@ v-dialog(
         handler: async function () {
           await setTimeout(() => {}, 50)
           this.qrLoading = true
-          this.myLink = `https://capacitor-template.enoki.xyz/user/${this.myProfile.userId}?openExternalBrowser=1`
+          this.myLink = `https://wallet.enoki.xyz/user/${this.myProfile.userId}?openExternalBrowser=1`
 
           const canvas = document.querySelector('#qr-canvas') as any
           if (!canvas) {
@@ -231,7 +231,7 @@ v-dialog(
       /** コンテンツの共有 */
       async copy (content: string) {
         await Share.share({
-          title: 'Capacitor Templateで位置情報を共有しよう',
+          title: 'Wallet Walletで位置情報を共有しよう',
           url: content,
         })
         this.searchResultDialog = false

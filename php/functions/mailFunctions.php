@@ -9,11 +9,11 @@ use PHPMailer\PHPMailer\Exception;
 // 本当はここenvから取得したい
 define('MailHeader', "
 <div style=\"text-align: center;\">
-<img src=\"https://capacitor-template.enoki.xyz/wp-content/uploads/2026/01/icon.png\" alt=\"Capacitor Template\" height=\"64px\">
+<img src=\"https://wallet.enoki.xyz/wp-content/uploads/2026/01/icon.png\" alt=\"Wallet Wallet\" height=\"64px\">
 </div>
 <br>
 <p>
-いつも Capacitor Template をご利用いただきありがとうございます。
+いつも Wallet Wallet をご利用いただきありがとうございます。
 </p>
 <hr>");
 define('MailFooter', "
@@ -21,7 +21,7 @@ define('MailFooter', "
 <p>このメールに返信することはできません。</p>
 <p>また、このメールに身に覚えのない場合は、エノキ電気までお問い合わせください。</p>
 <p>
-<a href=\"https://capacitor-template.enoki.xyz\">Capacitor Template</a> by <a href=\"https://enoki.xyz\">エノキ電気</a>
+<a href=\"https://wallet.enoki.xyz\">Wallet Wallet</a> by <a href=\"https://enoki.xyz\">エノキ電気</a>
 </p>
 <p>お問い合わせはこちら: <a href=\"mailto:info@enoki.xyz\">info@enoki.xyz</a></p>
 <p>&copy; 2024 エノキ電気</p>

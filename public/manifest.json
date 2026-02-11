@@ -1,6 +1,6 @@
 {
-  "short_name": "Capacitor Template",
-  "name": "Capacitor Template",
+  "short_name": "Wallet Wallet",
+  "name": "Wallet Wallet",
   "display": "standalone",
   "display_override": [
     "standalone"
@@ -77,5 +77,5 @@
       ]
     }
   ],
-  "description": "Capacitor Templateのアプリです。"
+  "description": "Wallet Walletのアプリです。"
 }

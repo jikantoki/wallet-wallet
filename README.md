@@ -1,10 +1,14 @@
-# Capacitor Template
+# Wallet Wallet
+
+クレカの番号管理
+
+## Capacitor Template
 
 Androidアプリ用のパッケージ群
 
 <img src="./public/icon.png" width="256px" alt="アイコン">
 
-[最新版ダウンロード](https://raw.githubusercontent.com/jikantoki/capacitor-template/refs/heads/main/app-release.apk)
+[最新版ダウンロード](https://raw.githubusercontent.com/jikantoki/wallet/refs/heads/main/app-release.apk)
 
 ## Nuxt4 Template
 
@@ -131,7 +135,7 @@ define('SMTP_Server', 'SMTPサーバー');
 define('SMTP_Port', 587); //基本は587を使えば大丈夫
 
 $mailHeader = "<p>
-いつも Capacitor Template をご利用いただきありがとうございます。
+いつも Wallet Wallet をご利用いただきありがとうございます。
 <hr>
 </p>";
 $mailFooter = "<p>
@@ -140,7 +144,7 @@ $mailFooter = "<p>
 <br>
 また、このメールに身に覚えのない場合は、エノキ電気までお問い合わせください。
 <br>
-<a href=\"https://enoki.xyz\">Capacitor Template</a> by <a href=\"https://enoki.xyz\">エノキ電気</a>
+<a href=\"https://enoki.xyz\">Wallet Wallet</a> by <a href=\"https://enoki.xyz\">エノキ電気</a>
 </p>";
 
 ```
@@ -150,14 +154,14 @@ $mailFooter = "<p>
 大体こんな感じで設定する
 
 ```htaccess
-#トップページを/capacitor-template/php にする
+#トップページを/wallet/php にする
 <IfModule mod_rewrite.c>
 RewriteEngine on
 RewriteBase /
-RewriteRule ^$ capacitor-template/php/ [L]
+RewriteRule ^$ wallet/php/ [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.+)$ capacitor-template/php/$1 [L]
+RewriteRule ^(.+)$ wallet/php/$1 [L]
 </IfModule>
 # 外部からのAPIへのアクセスを許可
 Header append Access-Control-Allow-Origin: "*"

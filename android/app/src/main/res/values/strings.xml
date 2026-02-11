@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Capacitor Template</string>
-    <string name="title_activity_main">Capacitor Template</string>
-    <string name="package_name">xyz.enoki.capacitor.template</string>
-    <string name="custom_url_scheme">xyz.enoki.capacitor.template</string>
+    <string name="app_name">Wallet Wallet</string>
+    <string name="title_activity_main">Wallet Wallet</string>
+    <string name="package_name">xyz.enoki.wallet</string>
+    <string name="custom_url_scheme">xyz.enoki.wallet</string>
     <string name="capacitor_background_geolocation_notification_channel_name">バックグラウンド追跡</string>
     <string name="capacitor_background_geolocation_notification_icon">drawable/ic_location_status</string>
 </resources>

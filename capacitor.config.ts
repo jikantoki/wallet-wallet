@@ -1,15 +1,15 @@
 import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
-  appId: 'xyz.enoki.capacitor.template',
-  appName: 'CapacitorTemplate',
+  appId: 'xyz.enoki.wallet',
+  appName: 'Wallet Wallet',
   webDir: 'dist',
   plugins: {
     StatusBar: {
       overlaysWebView: false,
     },
     // BackgroundRunner: {
-    //   label: 'xyz.enoki.capacitor.template.background',
+    //   label: 'xyz.enoki.wallet.background',
     //   src: 'runners/background-runner.js',
     //   event: 'CapacitorTemplateBackgroundRunner',
     //   repeat: true,
@@ -25,12 +25,12 @@ const config: CapacitorConfig = {
     },
   },
   server: {
-    hostname: 'capacitor-template.enoki.xyz',
+    hostname: 'wallet.enoki.xyz',
     androidScheme: 'https',
   },
   // deepLinks: {
   //   enabled: true,
-  //   prefixes: ['capacitor://', 'https://capacitor-template.enoki.xyz'],
+  //   prefixes: ['capacitor://', 'https://wallet.enoki.xyz'],
   // },
   android: {
     // useLegacyBridge: true,

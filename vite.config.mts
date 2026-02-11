@@ -68,7 +68,7 @@ export default defineConfig({
     ],
   },
   server: {
-    port: 8989,
+    port: 8990,
     strictPort: true,
   },
 })

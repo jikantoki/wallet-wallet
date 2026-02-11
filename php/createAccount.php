@@ -54,7 +54,7 @@ if (!$response) {
     <br>
     <h3>ユーザー名: {$username}</h3>
     <br>
-    <p>引き続き Capacitor Template をよろしくお願いいたします。</p>"
+    <p>引き続き Wallet Wallet をよろしくお願いいたします。</p>"
   );
   //アカウント作れた
   echo json_encode([

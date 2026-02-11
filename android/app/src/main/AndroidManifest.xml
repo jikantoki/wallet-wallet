@@ -27,17 +27,16 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="capacitor-template.enoki.xyz" />
+                <!-- <data android:scheme="https" android:host="wallet.enoki.xyz" /> -->
             </intent-filter>
 
             <!-- ここからカスタムプロトコル enoki:// の設定 -->
-            <intent-filter>
+            <!-- <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="capacitor" />
-                <!-- capacitor://enoki.xyz/user/hoge でアプリを起動させる -->
-            </intent-filter>
+            </intent-filter> -->
         </activity>
 
         <provider

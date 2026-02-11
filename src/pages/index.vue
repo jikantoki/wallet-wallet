@@ -5,12 +5,12 @@ v-card(
   )
   v-card-actions
     .ml-2(style="font-size: 1.3em; height: 4em; display: flex; align-items: center;")
-      p Capacitor Template
+      p Wallet Wallet
     v-spacer
   v-card-text(style="height: inherit; overflow-y: auto;")
     .wrap.my-4
       v-btn(
-        @click="a('https://github.com/jikantoki/capacitor-template')"
+        @click="a('https://github.com/jikantoki/wallet')"
         style="background-color: rgb(var(--v-theme-primary)); color: white;"
         ) Github
     .wrap
