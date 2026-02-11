@@ -49,6 +49,9 @@ export default defineComponent({
   },
   methods: {
     searchBrand (cardNumber: string): Brands {
+      if (cardNumber == '') {
+        return null
+      }
       // 先頭2文字はカード番号が0の場合があるので削除
       if (cardNumber.slice(0, 1) == '0') {
         cardNumber = cardNumber.slice(1, 15)

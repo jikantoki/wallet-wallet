@@ -4,7 +4,7 @@ v-card(
   :class="settings.hidden.isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
   )
   v-card-actions
-    p.ml-2(style="font-size: 1.3em") カードを登録
+    p.ml-2(style="font-size: 1.3em") 新規のカードを登録
     v-spacer
     v-btn(
       text
@@ -34,6 +34,12 @@ v-card(
         required
         prepend-inner-icon="mdi-credit-card"
         @keydown.enter="$refs.deadlineMM.focus()"
+        type="number"
+        :rules="[v => /[0-9]/.test(v) && v.length <= 16 || '数字のみ16桁まで']"
+        hide-spin-buttons
+        :min="14"
+        maxlength="16"
+        :counter="16"
         )
       p {{ searchBrand(editCard.cardNumber) ?? '不明なブランド' }}
       p 有効期限
@@ -42,23 +48,29 @@ v-card(
       )
         v-text-field(
           v-model="editCard.deadlineMM"
-          placeholder="2030"
+          placeholder="00"
           label="月（MM）"
           autocomplete="cc-exp-month"
           clearable
           ref="deadlineMM"
           required
           @keydown.enter="$refs.deadlineYYYY.focus()"
+          type="number"
+          :rules="[v => /[0-9]/.test(v) && v.length == 2 || '数字のみ2桁']"
+          hide-spin-buttons
           )
         v-text-field(
           v-model="editCard.deadlineYYYY"
           placeholder="2030"
-          label="年（YYYY）"
+          label="年（YYもしくはYYYY）"
           autocomplete="cc-exp-year"
           clearable
           ref="deadlineYYYY"
           required
           @keydown.enter="$refs.cardCVC.focus()"
+          type="number"
+          :rules="[v => /[0-9]/.test(v) && v.length <= 4 || '数字のみ4桁まで']"
+          hide-spin-buttons
           )
       v-text-field(
         v-model="editCard.cvc"
@@ -70,6 +82,9 @@ v-card(
         required
         prepend-inner-icon="mdi-form-textbox-password"
         @keydown.enter="$refs.ownName.focus()"
+        type="number"
+          :rules="[v => /[0-9]/.test(v) && v.length <= 4 || '数字のみ4桁まで']"
+        hide-spin-buttons
         )
       v-text-field(
         v-model="editCard.ownName"
@@ -94,14 +109,17 @@ v-card(
     v-card-actions
       v-spacer
       v-btn(
-        style=""
+        style="background-color: rgb(var(--v-theme-primary)); color: white;"
         ref="submitButton"
+        prepend-icon="mdi-check"
+        @click="addCardList(card)"
       ) 登録
 </template>
 
 <script lang="ts">
   import type { Card } from '@/stores/cards'
   import { Browser } from '@capacitor/browser'
+  import { Toast } from '@capacitor/toast'
   import mixins from '@/mixins/mixins'
   import { useCardsStore } from '@/stores/cards'
   import { useSettingsStore } from '@/stores/settings'
@@ -128,6 +146,25 @@ v-card(
       /** URLをブラウザで開く */
       async openURL (url: string) {
         await Browser.open({ url: url })
+      },
+      addCardList (card: Card) {
+        if (this.editCard.name.length > 0
+          && this.editCard.cardNumber.length >= 14
+          && this.editCard.cardNumber.length <= 16
+          && this.editCard.deadlineYYYY.length >= 2
+          && this.editCard.deadlineYYYY.length <= 4
+          && this.editCard.deadlineMM.length > 0
+          && this.editCard.deadlineMM.length <= 2
+          && this.editCard.cvc.length > 0
+          && this.editCard.cvc.length <= 4
+          && this.editCard.ownName.length > 0
+        ) {
+          this.cards.cards.push(card)
+          Toast.show({ text: 'カード情報を保存しました' })
+          this.$router.push('/')
+        } else {
+          Toast.show({ text: 'カード情報に不備があるため登録できません' })
+        }
       },
     },
   }
