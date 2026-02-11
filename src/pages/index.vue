@@ -27,6 +27,9 @@ v-card(
           p.opacity05(
             style="min-height: 1em;"
             ) {{ card.memo.length ? card.memo : '空白のメモ' }}
+    v-btn(
+      @click="auth"
+    ) 生体認証テスト
   //-- 下部のアクションバー --
   .action-bar
     .buttons
@@ -60,8 +63,9 @@ v-card(
         style="background-color: rgb(var(--v-theme-primary)); color: white"
         )
         v-icon mdi-pencil-plus
+    .bottom-android-15-or-higher(v-if="settings.hidden.isAndroid15OrHigher")
   //-- 左上の友達リストボタン --
-  //- .left-top-buttons
+  //-- .left-top-buttons
     .top-android-15-or-higher(v-if="settings.hidden.isAndroid15OrHigher")
     .current-button
       v-btn(
@@ -317,9 +321,10 @@ v-card(
 </template>
 
 <script lang="ts">
+  import { AndroidBiometryStrength, BiometricAuth, BiometryError, BiometryErrorType } from '@aparajita/capacitor-biometric-auth'
   import { App } from '@capacitor/app'
-  import { Browser } from '@capacitor/browser'
 
+  import { Browser } from '@capacitor/browser'
   import { Clipboard } from '@capacitor/clipboard'
   import { Share } from '@capacitor/share'
   import { Toast } from '@capacitor/toast'
@@ -549,6 +554,27 @@ v-card(
           url: content,
           title: title,
         })
+      },
+      /** 生体認証 */
+      async auth (): Promise <void> {
+        try {
+          await BiometricAuth.authenticate({
+            reason: '認証してください',
+            cancelTitle: 'キャンセル',
+            allowDeviceCredential: true,
+            androidTitle: '生体認証ログイン',
+            androidSubtitle: '本人確認をしてください',
+            androidConfirmationRequired: true,
+            androidBiometryStrength: AndroidBiometryStrength.weak,
+          })
+        } catch (error) {
+          if (error instanceof BiometryError && error.code !== BiometryErrorType.userCancel) {
+            // エラーを表示
+            Toast.show({ text: error.message })
+          } else {
+            console.log(error)
+          }
+        }
       },
     },
   }

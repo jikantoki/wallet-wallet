@@ -361,7 +361,7 @@ v-dialog(v-model="followDialogMessage")
             },
           )
           console.log(res)
-          switch (res.body.status) {
+          switch (res?.body.status) {
             case 'request':
             case 'ok': {
               this.followDialogMessage = '友達申請が完了しました！相手の承認をお待ちください'

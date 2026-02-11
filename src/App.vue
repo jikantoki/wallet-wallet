@@ -155,13 +155,13 @@ main {
 //テーマカラーの変更
 //青紫がテーマカラー！
 .v-theme--dark {
-  --v-theme-primary: 225,35,120!important;
+  --v-theme-primary: 137,169,224!important;
 }
 .v-theme--light {
-  --v-theme-primary: 225,35,120!important;
+  --v-theme-primary: 137,169,224!important;
 }
 :root {
-  --v-theme-primary: 225,35,120!important;
+  --v-theme-primary: 137,169,224!important;
 }
 
 :root {

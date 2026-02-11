@@ -2,11 +2,11 @@
 
 クレカの番号管理
 
+<img src="./public/icon.png" width="256px" alt="アイコン">
+
 ## Capacitor Template
 
 Androidアプリ用のパッケージ群
-
-<img src="./public/icon.png" width="256px" alt="アイコン">
 
 [最新版ダウンロード](https://raw.githubusercontent.com/jikantoki/wallet/refs/heads/main/app-release.apk)
 

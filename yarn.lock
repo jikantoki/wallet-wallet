@@ -2,6 +2,16 @@
 # yarn lockfile v1
 
 
+"@aparajita/capacitor-biometric-auth@^10.0.0":
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/@aparajita/capacitor-biometric-auth/-/capacitor-biometric-auth-10.0.0.tgz#b32372e1204796e02b79cabf24fa21d5a12b999c"
+  integrity sha512-azjWaRucB8x1/gSzSTp/NxelaOZyg+m765gSzjwUkSQgg30RrZPmPq6pyLeeXVSZNDY3Rxf5Hj8obgZaXirCFQ==
+  dependencies:
+    "@capacitor/android" "^8.0.2"
+    "@capacitor/app" "^8.0.0"
+    "@capacitor/core" "^8.0.2"
+    "@capacitor/ios" "^8.0.2"
+
 "@apidevtools/json-schema-ref-parser@^14.1.1":
   version "14.2.1"
   resolved "https://registry.npmjs.org/@apidevtools/json-schema-ref-parser/-/json-schema-ref-parser-14.2.1.tgz"
@@ -52,6 +62,11 @@
   version "8.0.0"
   resolved "https://registry.npmjs.org/@capacitor/android/-/android-8.0.0.tgz"
   integrity sha512-FrBSvVAC5JuLaYHNyDnwQny0/SYnP+xDQbc/KA4wInmRkMXLDv22fkx9aBJIDrxjuUVd+jsRih4SAt8FgMEzCw==
+
+"@capacitor/android@^8.0.2":
+  version "8.0.2"
+  resolved "https://registry.yarnpkg.com/@capacitor/android/-/android-8.0.2.tgz#874eccbc24db2bb6036838d8853760d964568508"
+  integrity sha512-0D7j0YvzjnfCMKLvFkAbx8b3Vwx+QfHFG5NzoXpI9sAl3zWiLsfa+NX4x92Fy+k4MGjLSMAfLThCqILYGDDsgw==
 
 "@capacitor/app-launcher@^8.0.0":
   version "8.0.0"
@@ -149,6 +164,13 @@
   dependencies:
     tslib "^2.1.0"
 
+"@capacitor/core@^8.0.2":
+  version "8.0.2"
+  resolved "https://registry.yarnpkg.com/@capacitor/core/-/core-8.0.2.tgz#2b05838c2729522803e30534d6d7f5d3296424bf"
+  integrity sha512-EXZfxkL6GFJS2cb7TIBR7RiHA5iz6ufDcl1VmUpI2pga3lJ5Ck2+iqbx7N+osL3XYem9ad4XCidJEMm64DX6UQ==
+  dependencies:
+    tslib "^2.1.0"
+
 "@capacitor/device@^8.0.0":
   version "8.0.0"
   resolved "https://registry.npmjs.org/@capacitor/device/-/device-8.0.0.tgz"
@@ -160,6 +182,11 @@
   integrity sha512-AfawIxQ8xBmKsEn/vEpgurGQB9+hFXRtwEiCXR+SSS0MkTw4bJrvLGnloZ/PblegYefvnay1q079Yz3PQ6y1dA==
   dependencies:
     "@capacitor/synapse" "^1.0.4"
+
+"@capacitor/ios@^8.0.2":
+  version "8.0.2"
+  resolved "https://registry.yarnpkg.com/@capacitor/ios/-/ios-8.0.2.tgz#9c9c48ed478099eed0573df085c3888f9dfe5758"
+  integrity sha512-7EM7vBxXI3Ku49aYCJcS9su5Y3i6UmXpx7e0y+oQV9PzCnZ6l5B0ACJ+gXAU0bM3q7/f+kGBsOtXMid84rU6MQ==
 
 "@capacitor/share@^8.0.0":
   version "8.0.0"
