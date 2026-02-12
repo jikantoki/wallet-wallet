@@ -215,9 +215,9 @@ v-card(
           (this.$refs.cardCVC as any).focus()
         }
       },
-      /** CVC入力時に4桁になったら次のフィールドに移動 */
+      /** CVC入力時に3桁になったら次のフィールドに移動 */
       onCVCInput () {
-        if (this.editCard.cvc?.length === 4) {
+        if (this.editCard.cvc?.length === 3) {
           (this.$refs.ownName as any).focus()
         }
       },
