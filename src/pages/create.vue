@@ -29,13 +29,14 @@ v-card(
         placeholder="0123 4567 8901 2345"
         label="カード番号（16桁）"
         autocomplete="cc-number"
+        inputmode="numeric"
         clearable
         ref="cardNumber"
         required
         prepend-inner-icon="mdi-credit-card"
         @keydown.enter="$refs.deadlineMM.focus()"
         type="text"
-        :rules="[v => /^[0-9\s]*$/.test(v) && v.replace(/\s/g, '').length <= 16 || '数字のみ16桁まで']"
+        :rules="[v => /^[0-9\s]*$/.test(v) && (v.replace(/\s/g, '').length >= 14 && v.replace(/\s/g, '').length <= 16 || v.replace(/\s/g, '').length === 0) || '数字のみ14〜16桁']"
         maxlength="19"
         :counter="19"
         )
@@ -163,10 +164,13 @@ v-card(
       }
     },
     computed: {
+      /** スペースを除いたカード番号 */
+      cardNumberWithoutSpaces () {
+        return this.editCard.cardNumber?.replace(/\s/g, '') ?? ''
+      },
       /** クレカのブランド名 */
       brand () {
-        const cardNumberWithoutSpaces = this.editCard.cardNumber?.replace(/\s/g, '') ?? ''
-        return this.searchBrand(cardNumberWithoutSpaces) ?? '不明なブランド'
+        return this.searchBrand(this.cardNumberWithoutSpaces) ?? '不明なブランド'
       },
     },
     async mounted () {
@@ -194,10 +198,9 @@ v-card(
         await Browser.open({ url: url })
       },
       addCardList (card: Card) {
-        const cardNumberWithoutSpaces = this.editCard.cardNumber?.replace(/\s/g, '') ?? ''
         if (
-          cardNumberWithoutSpaces.length >= 14
-          && cardNumberWithoutSpaces.length <= 16
+          this.cardNumberWithoutSpaces.length >= 14
+          && this.cardNumberWithoutSpaces.length <= 16
           && this.editCard.deadlineYYYY.length >= 2
           && this.editCard.deadlineYYYY.length <= 4
           && this.editCard.deadlineMM.length > 0
