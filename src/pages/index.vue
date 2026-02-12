@@ -64,7 +64,7 @@ v-card(
           h3(
             style="font-size: 1.2em;"
           ) {{ card.name }}
-          p {{ card.shopName }} ****{{ card.cardNumber.slice(-3) }}
+          p {{ card.bankName }} {{ card.shopName }} ****{{ card.cardNumber.slice(-3) }}
           p.opacity05(
             style="min-height: 1em;"
             ) {{ card.memo.length ? card.memo : '空白のメモ' }}
@@ -339,6 +339,11 @@ v-card(
             v-icon(@click.stop="copy(card.memo)") mdi-content-copy
       v-card-actions
         v-btn(
+          prepend-icon="mdi-trash-can"
+          style="background-color: var(--color-error); color: white;"
+          @click="deleteDialog = true"
+        ) 削除
+        v-btn(
           prepend-icon="mdi-close"
           style="background-color: rgb(var(--v-theme-primary)); color: white;"
           @click="detailDialog = false"
@@ -364,38 +369,38 @@ v-card(
           style="display: flex; gap: 16px;"
           )
           v-text-field(
-            v-model="card.bankName"
+            v-model="card.bankCode"
             label="銀行コード"
             readonly
             )
             template(v-slot:append-inner)
-              v-icon(@click.stop="copy(card.bankName)") mdi-content-copy
+              v-icon(@click.stop="copy(card.bankCode)") mdi-content-copy
           v-text-field(
-            v-model="detailBankDialogTargetBank.name"
+            v-model="card.bankName"
             label="銀行名"
             readonly
             style="width: 50%;"
             )
             template(v-slot:append-inner)
-              v-icon(@click.stop="copy(detailBankDialogTargetBank.name)") mdi-content-copy
+              v-icon(@click.stop="copy(card.bankName)") mdi-content-copy
         .deadline(
           style="display: flex; gap: 16px;"
           )
           v-text-field(
-            v-model="card.shopName"
+            v-model="card.shopCode"
             label="支店コード"
             readonly
             )
             template(v-slot:append-inner)
-              v-icon(@click.stop="copy(card.shopName)") mdi-content-copy
+              v-icon(@click.stop="copy(card.shopCode)") mdi-content-copy
           v-text-field(
-            v-model="detailBankDialogTargetBranch.name"
+            v-model="card.shopName"
             label="支店名"
             readonly
             style="width: 50%;"
             )
             template(v-slot:append-inner)
-              v-icon(@click.stop="copy(detailBankDialogTargetBranch.name)") mdi-content-copy
+              v-icon(@click.stop="copy(card.shopName)") mdi-content-copy
         v-text-field(
           v-model="card.type"
           label="種類"
@@ -428,6 +433,11 @@ v-card(
           template(v-slot:append-inner)
             v-icon(@click.stop="copy(card.memo)") mdi-content-copy
       v-card-actions
+        v-btn(
+          prepend-icon="mdi-trash-can"
+          style="background-color: var(--color-error); color: white;"
+          @click="deleteBankDialog = true"
+        ) 削除
         v-btn(
           prepend-icon="mdi-close"
           style="background-color: rgb(var(--v-theme-primary)); color: white;"
@@ -481,6 +491,82 @@ v-card(
           @click="createTypeSelectDialog = false"
           style="background-color: rgb(var(--v-theme-primary)); color: white"
         ) キャンセル
+  v-dialog(
+    v-model="deleteBankDialog"
+  )
+    v-card(
+      v-for="card in [cards.bank[detailBankDialogTarget]]"
+      width="100%"
+    )
+      v-card-title 削除
+      v-card-text
+        p 以下の情報を削除しますか？
+        table.my-4(
+          border="1"
+          style="width: 100%; border-collapse: collapse;"
+        )
+          tbody
+            tr
+              th.pa-2 カード名
+              td.pa-2 {{ card.name }}
+            tr
+              th.pa-2 銀行名
+              td.pa-2 {{ card.bankName }}
+            tr
+              th.pa-2 支店名
+              td.pa-2 {{ card.shopName }}
+            tr
+              th.pa-2 メモ
+              td.pa-2 {{ card.memo }}
+      v-card-actions
+        v-btn(
+          prepend-icon="mdi-close"
+          @click="deleteBankDialog = false"
+          style="background-color: rgb(var(--v-theme-primary)); color: white;"
+        ) キャンセル
+        v-btn(
+          prepend-icon="mdi-trash-can"
+          @click="deleteBank"
+          style="background-color: var(--color-error); color: white;"
+        ) 削除
+  v-dialog(
+    v-model="deleteDialog"
+  )
+    v-card(
+      v-for="card in [cards.cards[detailDialogTarget]]"
+      width="100%"
+    )
+      v-card-title 削除
+      v-card-text
+        p 以下の情報を削除しますか？
+        table.my-4(
+          border="1"
+          style="width: 100%; border-collapse: collapse;"
+        )
+          tbody
+            tr
+              th.pa-2 カード名
+              td.pa-2 {{ card.name }}
+            tr
+              th.pa-2 ブランド
+              td.pa-2 {{ searchBrand(card.cardNumber) ?? '不明なブランド' }}
+            tr
+              th.pa-2 カード番号
+              td.pa-2 ******{{ card.cardNumber.slice(-4) }}
+            tr
+              th.pa-2 メモ
+              td.pa-2 {{ card.memo }}
+      v-card-actions
+        v-btn(
+          prepend-icon="mdi-close"
+          @click="deleteDialog = false"
+          style="background-color: rgb(var(--v-theme-primary)); color: white;"
+        ) キャンセル
+        v-btn(
+          prepend-icon="mdi-trash-can"
+          @click="deleteCard"
+          style="background-color: var(--color-error); color: white;"
+        ) 削除
 </template>
 
 <script lang="ts">
@@ -537,7 +623,12 @@ v-card(
         detailBankDialogTarget: null as number | null,
         /** どのタイプのカードを登録するか？ */
         createTypeSelectDialog: false,
+        /** 銀行コード */
         zenginCode,
+        /** クレカ削除確認ダイアログ */
+        deleteDialog: false,
+        /** 銀行口座削除確認ダイアログ */
+        deleteBankDialog: false,
       }
     },
     computed: {
@@ -615,8 +706,17 @@ v-card(
           /** オプションダイアログを閉じる */
           this.optionsDialog = false
         } else if (this.detailDialog) {
-          /** 編集ダイアログを閉じる */
+          /** 詳細ダイアログを閉じる */
           this.detailDialog = false
+        } else if (this.detailBankDialog) {
+          /** 詳細ダイアログを閉じる */
+          this.detailBankDialog = false
+        } else if (this.deleteDialog) {
+          /** 削除ダイアログを閉じる */
+          this.deleteDialog = false
+        } else if (this.deleteBankDialog) {
+          /** 削除ダイアログを閉じる */
+          this.deleteBankDialog = false
         } else if (this.$route.path === '/') {
           /** ルートページならアプリを最小化 */
           App.minimizeApp()
@@ -760,6 +860,28 @@ v-card(
             console.log(error)
           }
         }
+      },
+      deleteBank () {
+        this.deleteBankDialog = false
+        this.detailBankDialog = false
+        // ここは0.5秒以上遅延させないとバグる
+        setTimeout(() => {
+          if (this.detailBankDialogTarget === null) {
+            return null
+          }
+          this.cards.bank.splice(this.detailBankDialogTarget, 1)
+        }, 500)
+      },
+      deleteCard () {
+        this.deleteDialog = false
+        this.detailDialog = false
+        // ここは0.5秒以上遅延させないとバグる
+        setTimeout(() => {
+          if (this.detailDialogTarget === null) {
+            return null
+          }
+          this.cards.cards.splice(this.detailDialogTarget, 1)
+        }, 500)
       },
     },
   }

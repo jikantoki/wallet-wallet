@@ -69,7 +69,10 @@ export default defineComponent({
             case 35: {
               return 'JCB'
             }
-            case 36: {
+            case 30:
+            case 36:
+            case 38:
+            case 39: {
               return 'Diners'
             }
             case 34:

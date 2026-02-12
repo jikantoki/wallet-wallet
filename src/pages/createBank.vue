@@ -15,12 +15,11 @@ v-card(
     .card-form
       v-text-field(
         v-model="editCard.name"
-        placeholder="○○銀行のカード"
-        label="カード名"
+        :placeholder="editCard.bankName"
+        :label="`${editCard.bankName.length ? editCard.bankName : 'カード名'}`"
         autocomplete="username"
         clearable
         ref="cardName"
-        required
         prepend-inner-icon="mdi-tag"
         @keydown.enter="$refs.bankNameCode.focus()"
         )
@@ -28,7 +27,7 @@ v-card(
         style="display: flex; gap: 16px;"
       )
         v-autocomplete(
-          v-model="editCard.bankName"
+          v-model="editCard.bankCode"
           placeholder="0000"
           label="銀行コード"
           ref="bankNameCode"
@@ -38,7 +37,7 @@ v-card(
           @keydown.enter="$refs.bankName.focus()"
           )
         v-autocomplete(
-          v-model="editCard.bankName"
+          v-model="editCard.bankCode"
           placeholder="○○銀行"
           label="銀行名"
           ref="bankName"
@@ -52,7 +51,7 @@ v-card(
         style="display: flex; gap: 16px;"
       )
         v-autocomplete(
-          v-model="editCard.shopName"
+          v-model="editCard.shopCode"
           placeholder="000"
           label="支店コード"
           ref="shopNameCode"
@@ -60,9 +59,10 @@ v-card(
           :items="bankBranches"
           item-title="code"
           @keydown.enter="$refs.shopName.focus()"
+          :disabled="!editCard.bankCode"
           )
         v-autocomplete(
-          v-model="editCard.shopName"
+          v-model="editCard.shopCode"
           placeholder="○○支店"
           label="支店名"
           ref="shopName"
@@ -71,6 +71,7 @@ v-card(
           @keydown.enter="$refs.type.focus()"
           style="width: 50%;"
           suffix="支店"
+          :disabled="!editCard.bankCode"
           )
       v-select(
         v-model="editCard.type"
@@ -143,7 +144,13 @@ v-card(
         cards: useCardsStore(),
         editCard: {
           name: '',
+          /** 銀行コード */
+          bankCode: '',
+          /** 銀行名・コードが入力されたら自動で反映する */
           bankName: '',
+          /** 支店コード */
+          shopCode: '',
+          /** 支店名・コードが入力されたら自動で反映する */
           shopName: '',
           type: '普通',
           cardNumber: '',
@@ -168,16 +175,20 @@ v-card(
     },
     watch: {
       /** 銀行名が変わった時 */
-      'editCard.bankName': {
-        handler (bankName: string) {
+      'editCard.bankCode': {
+        handler (bankCode: string) {
           const banks = Object.values(this.zenginCode) as any[]
           for (const bank of banks) {
-            if (bankName !== this.zenginCode[bank.code].name
-              && bankName !== this.zenginCode[bank.code].code
+            if (bankCode !== this.zenginCode[bank.code].name
+              && bankCode !== this.zenginCode[bank.code].code
             ) {
               continue
             }
+            // 銀行名を自動反映しておく
+            this.editCard.bankName = this.zenginCode[bank.code].name
+            /** 支店リスト */
             const branches = this.zenginCode[bank.code].branches
+            // 整形する
             this.bankBranches = Object.values(branches).map((branch: any) => ({
               text: branch.hira,
               title: branch.name,
@@ -186,7 +197,22 @@ v-card(
             }))
             break
           }
+          // 銀行名が変わったので、支店コードをリセット
+          this.editCard.shopCode = ''
           this.editCard.shopName = ''
+        },
+        deep: true,
+        immediate: true,
+      },
+      'editCard.shopCode': {
+        handler (shopCode: string) {
+          for (const branch of this.bankBranches) {
+            if (branch.code != shopCode) {
+              continue
+            }
+            // 支店名を入力する
+            this.editCard.shopName = branch.title
+          }
         },
         deep: true,
         immediate: true,
@@ -217,14 +243,17 @@ v-card(
         await Browser.open({ url: url })
       },
       addCardList (card: Bank) {
-        if (this.editCard.name.length > 0
-          && this.editCard.cardNumber.length > 0
+        if (
+          this.editCard.cardNumber.length > 0
           && this.editCard.cardNumber.length <= 7
           && this.editCard.ownName.length > 0
           && this.editCard.bankName.length > 0
           && this.editCard.shopName.length > 0
           && this.editCard.type.length > 0
         ) {
+          if (this.editCard.name.length === 0) {
+            this.editCard.name = this.editCard.bankName
+          }
           this.cards.bank.push(card)
           Toast.show({ text: 'カード情報を保存しました' })
           this.$router.push('/')
