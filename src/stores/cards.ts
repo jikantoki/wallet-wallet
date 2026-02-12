@@ -1,4 +1,11 @@
 import { defineStore } from 'pinia'
+import SecureLS from 'secure-ls'
+
+const ls = new SecureLS({
+  isCompression: false,
+  encodingType: 'aes',
+  encryptionSecret: import.meta.env.localStorageKey as string,
+})
 
 /** カードの構造 */
 export type Card = {
@@ -49,5 +56,17 @@ export const useCardsStore = defineStore('cards', {
     cards: [] as Card[],
     bank: [] as Bank[],
   }),
-  persist: true,
+  persist: {
+    key: 'card-data',
+    storage: localStorage,
+    serializer: {
+      serialize: state => {
+        ls.set('card-data', state)
+        return localStorage.getItem('card-data') || ''
+      },
+      deserialize: () => {
+        return ls.get('card-data')
+      },
+    },
+  },
 })

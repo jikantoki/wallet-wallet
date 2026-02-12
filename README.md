@@ -4,6 +4,14 @@
 
 <img src="./public/icon.png" width="256px" alt="アイコン">
 
+## .envファイル
+
+LocalStorageにデータを暗号化して保存するため、/.envに以下のファイルを置いてください
+
+```env
+localStorageKey=ローカルストレージを暗号化するパスワード
+```
+
 ## Capacitor Template
 
 Androidアプリ用のパッケージ群
