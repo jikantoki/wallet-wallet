@@ -8,10 +8,21 @@ v-card(
       p Wallet Wallet
     v-spacer
   v-card-text(style="height: inherit; overflow-y: auto;")
-    h2 カードリスト（{{ cards.cards.length }}枚）
+    h2 クレジットカード（{{ cards.cards.length }}枚）
+    .settings-list.my-4(
+      v-if="!cards.cards.length"
+    )
+      .setting-item(
+        @click="$router.push('/create')"
+        v-ripple
+      )
+        .icon
+          v-icon mdi-help
+        .text
+          p クレジットカードが登録されていません
+          p.opacity05 ここをクリックして、新しいカードを追加します
     .settings-list.my-4(
       v-for="(card, cnt) of cards.cards"
-      lines="three"
       )
       .setting-item(
         @click="detailDialogTarget = cnt;detailDialog = true;"
@@ -24,6 +35,36 @@ v-card(
             style="font-size: 1.2em;"
           ) {{ card.name }}
           p {{ searchBrand(card.cardNumber) ?? '不明なブランド' }} ******{{ card.cardNumber.slice(-4) }}
+          p.opacity05(
+            style="min-height: 1em;"
+            ) {{ card.memo.length ? card.memo : '空白のメモ' }}
+    h2 銀行口座（{{ cards.bank.length }}枚）
+    .settings-list.my-4(
+      v-if="!cards.bank.length"
+    )
+      .setting-item(
+        @click="$router.push('/createBank')"
+        v-ripple
+      )
+        .icon
+          v-icon mdi-help
+        .text
+          p 銀行口座が登録されていません
+          p.opacity05 ここをクリックして、新しい銀行口座を追加します
+    .settings-list.my-4(
+      v-for="(card, cnt) of cards.bank"
+      )
+      .setting-item(
+        @click="detailBankDialogTarget = cnt;detailBankDialog = true;"
+        v-ripple
+        )
+        .icon
+          v-icon mdi-bank
+        .text
+          h3(
+            style="font-size: 1.2em;"
+          ) {{ card.name }}
+          p {{ card.shopName }} ****{{ card.cardNumber.slice(-3) }}
           p.opacity05(
             style="min-height: 1em;"
             ) {{ card.memo.length ? card.memo : '空白のメモ' }}
@@ -41,7 +82,7 @@ v-card(
         p トップ
       .button(
         v-ripple
-        @click="$router.push('/create')"
+        @click="createTypeSelectDialog = true"
         )
         v-icon mdi-pencil-plus
         p 追加
@@ -59,7 +100,7 @@ v-card(
       v-btn(
         size="x-large"
         icon
-        @click="$router.push('/create')"
+        @click="createTypeSelectDialog = true"
         style="background-color: rgb(var(--v-theme-primary)); color: white"
         )
         v-icon mdi-pencil-plus
@@ -302,6 +343,96 @@ v-card(
           style="background-color: rgb(var(--v-theme-primary)); color: white;"
           @click="detailDialog = false"
         ) 閉じる
+  v-dialog(
+    v-model="detailBankDialog"
+    )
+    v-card(
+      v-for="card in [cards.bank[detailBankDialogTarget]]"
+      width="100%"
+    )
+      v-card-title 口座情報
+      v-card-text
+        v-text-field(
+          v-model="card.name"
+          label="カード名"
+          prepend-inner-icon="mdi-tag"
+          readonly
+          )
+          template(v-slot:append-inner)
+            v-icon(@click.stop="copy(card.name)") mdi-content-copy
+        .deadline(
+          style="display: flex; gap: 16px;"
+          )
+          v-text-field(
+            v-model="card.bankName"
+            label="銀行コード"
+            readonly
+            )
+            template(v-slot:append-inner)
+              v-icon(@click.stop="copy(card.bankName)") mdi-content-copy
+          v-text-field(
+            v-model="detailBankDialogTargetBank.name"
+            label="銀行名"
+            readonly
+            style="width: 50%;"
+            )
+            template(v-slot:append-inner)
+              v-icon(@click.stop="copy(detailBankDialogTargetBank.name)") mdi-content-copy
+        .deadline(
+          style="display: flex; gap: 16px;"
+          )
+          v-text-field(
+            v-model="card.shopName"
+            label="支店コード"
+            readonly
+            )
+            template(v-slot:append-inner)
+              v-icon(@click.stop="copy(card.shopName)") mdi-content-copy
+          v-text-field(
+            v-model="detailBankDialogTargetBranch.name"
+            label="支店名"
+            readonly
+            style="width: 50%;"
+            )
+            template(v-slot:append-inner)
+              v-icon(@click.stop="copy(detailBankDialogTargetBranch.name)") mdi-content-copy
+        v-text-field(
+          v-model="card.type"
+          label="種類"
+          readonly
+          )
+          template(v-slot:append-inner)
+            v-icon(@click.stop="copy(card.type)") mdi-content-copy
+        v-text-field(
+          v-model="card.cardNumber"
+          label="カード番号（7桁）"
+          prepend-inner-icon="mdi-credit-card"
+          readonly
+          )
+          template(v-slot:append-inner)
+            v-icon(@click.stop="copy(card.cardNumber)") mdi-content-copy
+        v-text-field(
+          v-model="card.ownName"
+          label="名義"
+          prepend-inner-icon="mdi-account"
+          readonly
+          )
+          template(v-slot:append-inner)
+            v-icon(@click.stop="copy(card.ownName)") mdi-content-copy
+        v-text-field(
+          v-model="card.memo"
+          label="メモ"
+          prepend-inner-icon="mdi-note-outline"
+          readonly
+          )
+          template(v-slot:append-inner)
+            v-icon(@click.stop="copy(card.memo)") mdi-content-copy
+      v-card-actions
+        v-btn(
+          prepend-icon="mdi-close"
+          style="background-color: rgb(var(--v-theme-primary)); color: white;"
+          @click="detailBankDialog = false"
+        ) 閉じる
   //v-dialog(
     v-model="acceptDialog"
     persistent
@@ -318,6 +449,38 @@ v-card(
           @click="$router.push('/friendlist')"
           style="background-color: rgb(var(--v-theme-primary)); color: white"
         ) リクエストを見る
+  v-dialog(
+    v-model="createTypeSelectDialog"
+  )
+    v-card
+      v-card-title 新規登録
+      v-card-text
+        .settings-list.my-4(
+        )
+          .setting-item(
+            @click="$router.push('/create')"
+            v-ripple
+          )
+            .icon
+              v-icon mdi-credit-card
+            .text
+              p クレジットカード
+              p.opacity05 14～16桁のカード番号と、有効期限/CVCが必要です
+          .setting-item(
+            @click="$router.push('/createBank')"
+            v-ripple
+          )
+            .icon
+              v-icon mdi-bank
+            .text
+              p 銀行口座
+              p.opacity05 7桁の口座番号と、銀行名/支店名が必要です
+      v-card-actions
+        v-btn(
+          prepend-icon="mdi-close"
+          @click="createTypeSelectDialog = false"
+          style="background-color: rgb(var(--v-theme-primary)); color: white"
+        ) キャンセル
 </template>
 
 <script lang="ts">
@@ -328,6 +491,8 @@ v-card(
   import { Clipboard } from '@capacitor/clipboard'
   import { Share } from '@capacitor/share'
   import { Toast } from '@capacitor/toast'
+  // @ts-ignore
+  import zenginCode from 'zengin-code'
   // @ts-ignore
   import mixins from '@/mixins/mixins'
   import { useCardsStore } from '@/stores/cards'
@@ -367,19 +532,39 @@ v-card(
         /** カード情報詳細ダイアログ */
         detailDialog: false,
         detailDialogTarget: null as number | null,
+        /** 銀行口座情報詳細ダイアログ */
+        detailBankDialog: false,
+        detailBankDialogTarget: null as number | null,
+        /** どのタイプのカードを登録するか？ */
+        createTypeSelectDialog: false,
+        zenginCode,
       }
     },
     computed: {
       detailDialogTargetBrand () {
-        if (this.detailDialogTarget == null
+        if (this.detailDialogTarget === null
         ) {
-          return false
+          return null
         }
         const cardNumber = this.cards.cards[this.detailDialogTarget]?.cardNumber
         if (cardNumber == undefined) {
-          return false
+          return null
         }
         return this.searchBrand(cardNumber) ?? '不明なブランド'
+      },
+      detailBankDialogTargetBank () {
+        if (this.detailBankDialogTarget === null) {
+          return null
+        }
+        const bankCode = this.cards.bank[this.detailBankDialogTarget]?.bankName
+        return zenginCode[bankCode]
+      },
+      detailBankDialogTargetBranch () {
+        if (this.detailBankDialogTarget === null) {
+          return null
+        }
+        const branchCode = this.cards.bank[this.detailBankDialogTarget]?.shopName
+        return this.detailBankDialogTargetBank.branches[branchCode]
       },
     },
     watch: {

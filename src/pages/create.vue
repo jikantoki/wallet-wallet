@@ -4,7 +4,7 @@ v-card(
   :class="settings.hidden.isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
   )
   v-card-actions
-    p.ml-2(style="font-size: 1.3em") 新規のカードを登録
+    p.ml-2(style="font-size: 1.3em") 新規クレジットカード登録
     v-spacer
     v-btn(
       text
@@ -15,7 +15,7 @@ v-card(
     .card-form
       v-text-field(
         v-model="editCard.name"
-        placeholder="○○銀行"
+        placeholder="○○カード"
         label="カード名"
         autocomplete="username"
         clearable
@@ -118,6 +118,7 @@ v-card(
 
 <script lang="ts">
   import type { Card } from '@/stores/cards'
+  import { App } from '@capacitor/app'
   import { Browser } from '@capacitor/browser'
   import { Toast } from '@capacitor/toast'
   import mixins from '@/mixins/mixins'
@@ -141,7 +142,25 @@ v-card(
         } as Card,
       }
     },
-    async mounted () {},
+    async mounted () {
+      App.addListener('backButton', () => {
+        if (this.editCard.name.length > 0
+          || this.editCard.cardNumber.length > 0
+          || this.editCard.deadlineMM.length > 0
+          || this.editCard.deadlineYYYY.length > 0
+          || this.editCard.cvc.length > 0
+          || this.editCard.ownName.length > 0
+          || this.editCard.memo?.length
+        ) {
+          Toast.show({ text: 'フォームを空にしてから戻れます' })
+        } else {
+          this.$router.back()
+        }
+      })
+    },
+    unmounted () {
+      App.removeAllListeners()
+    },
     methods: {
       /** URLをブラウザで開く */
       async openURL (url: string) {
