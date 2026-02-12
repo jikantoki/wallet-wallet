@@ -246,6 +246,10 @@ v-card(
             .icon-and-text
               v-icon mdi-cog
               v-list-item-title 設定
+          v-list-item.item( @click="$router.push('/export')" )
+            .icon-and-text
+              v-icon mdi-file-import
+              v-list-item-title インポート・エクスポート
           v-list-item.item( @click="$router.push('/terms')" )
             .icon-and-text
               v-icon mdi-file-document-outline
@@ -489,7 +493,7 @@ v-card(
         v-btn(
           prepend-icon="mdi-close"
           @click="createTypeSelectDialog = false"
-          style="background-color: rgb(var(--v-theme-primary)); color: white"
+          style="background-color: rgb(var(--v-theme-primary)); color: white;"
         ) キャンセル
   v-dialog(
     v-model="deleteBankDialog"
@@ -753,6 +757,7 @@ v-card(
       App.removeAllListeners()
     },
     methods: {
+      /** クリップボードにコピー */
       async copy (content: string) {
         await Clipboard.write({
           string: content,
