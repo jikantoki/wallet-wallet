@@ -165,7 +165,7 @@ v-card(
     computed: {
       /** クレカのブランド名 */
       brand () {
-        const cardNumberWithoutSpaces = this.editCard.cardNumber.replace(/\s/g, '')
+        const cardNumberWithoutSpaces = this.editCard.cardNumber?.replace(/\s/g, '') ?? ''
         return this.searchBrand(cardNumberWithoutSpaces) ?? '不明なブランド'
       },
     },
@@ -194,7 +194,7 @@ v-card(
         await Browser.open({ url: url })
       },
       addCardList (card: Card) {
-        const cardNumberWithoutSpaces = this.editCard.cardNumber.replace(/\s/g, '')
+        const cardNumberWithoutSpaces = this.editCard.cardNumber?.replace(/\s/g, '') ?? ''
         if (
           cardNumberWithoutSpaces.length >= 14
           && cardNumberWithoutSpaces.length <= 16
