@@ -25,7 +25,7 @@ v-card(
       v-for="(card, cnt) of cards.cards"
       )
       .setting-item(
-        @click="detailDialogTarget = cnt;detailDialog = true;"
+        @click="openCard(cnt)"
         v-ripple
         )
         .icon
@@ -55,7 +55,7 @@ v-card(
       v-for="(card, cnt) of cards.bank"
       )
       .setting-item(
-        @click="detailBankDialogTarget = cnt;detailBankDialog = true;"
+        @click="openBank(cnt)"
         v-ripple
         )
         .icon
@@ -68,9 +68,6 @@ v-card(
           p.opacity05(
             style="min-height: 1em;"
             ) {{ card.memo.length ? card.memo : '空白のメモ' }}
-    v-btn(
-      @click="auth"
-    ) 生体認証テスト
   //-- 下部のアクションバー --
   .action-bar
     .buttons
@@ -574,7 +571,7 @@ v-card(
 </template>
 
 <script lang="ts">
-  import { AndroidBiometryStrength, BiometricAuth, BiometryError, BiometryErrorType } from '@aparajita/capacitor-biometric-auth'
+  import { AndroidBiometryStrength, BiometricAuth, BiometryError, BiometryErrorType, BiometryType } from '@aparajita/capacitor-biometric-auth'
   import { App } from '@capacitor/app'
 
   import { Browser } from '@capacitor/browser'
@@ -845,8 +842,17 @@ v-card(
           title: title,
         })
       },
-      /** 生体認証 */
-      async auth (): Promise <void> {
+      /**
+       * ## 生体認証
+       * await必須
+       * @returns boolean 認証OK→true、NG→false
+       */
+      async auth (): Promise <boolean> {
+        const isAvailable = await BiometricAuth.checkBiometry()
+        if (isAvailable.isAvailable == false) {
+          // 認証がそもそも機能しない場合は、仕方ないので承認する
+          return true
+        }
         try {
           await BiometricAuth.authenticate({
             reason: '認証してください',
@@ -857,6 +863,7 @@ v-card(
             androidConfirmationRequired: true,
             androidBiometryStrength: AndroidBiometryStrength.weak,
           })
+          return true
         } catch (error) {
           if (error instanceof BiometryError && error.code !== BiometryErrorType.userCancel) {
             // エラーを表示
@@ -864,6 +871,7 @@ v-card(
           } else {
             console.log(error)
           }
+          return false
         }
       },
       deleteBank () {
@@ -887,6 +895,28 @@ v-card(
           }
           this.cards.cards.splice(this.detailDialogTarget, 1)
         }, 500)
+      },
+      async openBank (index: number) {
+        const authResult = await this.auth()
+        if (authResult) {
+          this.detailBankDialogTarget = index
+          this.detailBankDialog = true
+          return true
+        } else {
+          Toast.show({ text: '生体認証に失敗しました' })
+          return false
+        }
+      },
+      async openCard (index: number) {
+        const authResult = await this.auth()
+        if (authResult) {
+          this.detailDialogTarget = index
+          this.detailDialog = true
+          return true
+        } else {
+          Toast.show({ text: '生体認証に失敗しました' })
+          return false
+        }
       },
     },
   }
