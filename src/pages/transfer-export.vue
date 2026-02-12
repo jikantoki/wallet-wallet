@@ -15,7 +15,7 @@ v-card(
     .content
       h2 QRコードでデータを転送
       p.my-4 カードと銀行口座のデータをQRコードで他の端末に転送できます。パスワードを設定して暗号化されます。
-      
+
       v-text-field(
         v-model="password"
         label="転送用パスワード"
@@ -26,7 +26,7 @@ v-card(
         prepend-icon="mdi-lock"
         @input="onPasswordChange"
       )
-      
+
       v-text-field.mt-4(
         v-model="passwordConfirm"
         label="パスワード確認"
@@ -35,7 +35,7 @@ v-card(
         prepend-icon="mdi-lock-check"
         @input="onPasswordChange"
       )
-      
+
       v-btn.mt-4(
         @click="generateQRCode"
         prepend-icon="mdi-qrcode"
@@ -43,7 +43,7 @@ v-card(
         :disabled="!canGenerate"
         block
       ) QRコードを生成
-      
+
       .qr-display.mt-8(v-if="qrGenerated")
         h3.mb-4 QRコード
         p.mb-4 このQRコードをインポート先の端末でスキャンしてください
@@ -66,23 +66,39 @@ v-card(
             p.my-4(
               style="color: black;"
             ) QRコード生成中…
-        
+
         .warning.mt-4.pa-4(
           style="background-color: rgba(var(--v-theme-warning), 0.1); border-radius: 8px;"
         )
           v-icon(color="warning") mdi-alert
-          p.mt-2 
+          p.mt-2
             strong 重要：
             | QRコードには暗号化されたデータが含まれています。パスワードを忘れないようにしてください。
-      
+
       .my-16
+
+v-dialog(
+  v-model="errorDialog"
+  max-width="400"
+)
+  v-card
+    v-card-title
+      v-icon.mr-2(color="error") mdi-alert-circle
+      | エラー
+    v-card-text {{ errorMessage }}
+    v-card-actions
+      v-spacer
+      v-btn(
+        @click="errorDialog = false"
+        text
+      ) 閉じる
 </template>
 
 <script lang="ts">
   import QRCode from 'qrcode'
+  import { encryptData } from '@/js/transferEncryption'
   import { useCardsStore } from '@/stores/cards'
   import { useSettingsStore } from '@/stores/settings'
-  import { encryptData } from '@/js/transferEncryption'
 
   export default {
     data () {
@@ -93,12 +109,14 @@ v-card(
         passwordConfirm: '',
         qrGenerated: false,
         qrLoading: false,
+        errorDialog: false,
+        errorMessage: '',
       }
     },
     computed: {
       canGenerate (): boolean {
-        return this.password.length >= 8 && 
-               this.password === this.passwordConfirm
+        return this.password.length >= 8
+          && this.password === this.passwordConfirm
       },
     },
     methods: {
@@ -109,35 +127,37 @@ v-card(
         if (!this.canGenerate) {
           return
         }
-        
+
         this.qrLoading = true
         this.qrGenerated = true
-        
+
         try {
           // Prepare data to export
+          // version: Data format version for future compatibility checks
+          // timestamp: Export timestamp for reference (not currently used in validation)
           const exportData = {
             cards: this.cards.cards,
             bank: this.cards.bank,
-            version: 1, // Version for future compatibility
+            version: 1,
             timestamp: new Date().toISOString(),
           }
-          
+
           // Encrypt the data
           const encryptedData = encryptData(exportData, this.password)
-          
+
           // Create transfer URL with encrypted data
           const transferData = {
             d: encryptedData, // encrypted data
             v: 1, // version
           }
           const dataString = JSON.stringify(transferData)
-          
+
           // For QR code, we'll use a URL scheme
           const qrData = `wallet-transfer:${btoa(dataString)}`
-          
+
           // Wait a bit for DOM to be ready
           await new Promise(resolve => setTimeout(resolve, 100))
-          
+
           // Generate QR code
           const canvas = document.querySelector('#transfer-qr-canvas') as any
           if (!canvas) {
@@ -145,7 +165,7 @@ v-card(
             this.qrLoading = false
             return
           }
-          
+
           await QRCode.toCanvas(
             canvas,
             qrData,
@@ -155,14 +175,15 @@ v-card(
               errorCorrectionLevel: 'M',
             },
           )
-          
+
           canvas.style.height = '70vw'
           canvas.style.width = '70vw'
-          
+
           this.qrLoading = false
         } catch (error) {
           console.error('QR code generation failed:', error)
-          alert('QRコード生成に失敗しました')
+          this.errorMessage = 'QRコード生成に失敗しました'
+          this.errorDialog = true
           this.qrLoading = false
           this.qrGenerated = false
         }

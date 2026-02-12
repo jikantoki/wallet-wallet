@@ -15,7 +15,7 @@ v-card(
     .content
       h2 QRコードからデータをインポート
       p.my-4 転送元の端末で生成したQRコードをスキャンして、データをインポートします。
-      
+
       v-alert.my-4(
         type="warning"
         variant="tonal"
@@ -23,7 +23,7 @@ v-card(
         | 既存のカードと銀行口座データは
         strong 上書き
         | されます。事前にバックアップを取ることをお勧めします。
-      
+
       .qrcode-stream.my-4(
         v-if="!scanned"
         style="background-color: white;position: relative;"
@@ -35,11 +35,11 @@ v-card(
         .scan-wrap(
           style="width: 100%; height: 100%;z-index: 999;position: absolute;"
         )
-      
+
       .scanned-content.my-4(v-if="scanned")
         v-icon.mb-2(color="success" size="64") mdi-check-circle
         h3 QRコードをスキャンしました
-        
+
         v-text-field.mt-4(
           v-model="password"
           label="転送用パスワード"
@@ -50,7 +50,7 @@ v-card(
           prepend-icon="mdi-lock"
           :disabled="importing"
         )
-        
+
         v-btn.mt-4(
           @click="importData"
           prepend-icon="mdi-database-import"
@@ -59,7 +59,7 @@ v-card(
           :loading="importing"
           block
         ) データをインポート
-        
+
         v-btn.mt-2(
           @click="resetScan"
           prepend-icon="mdi-refresh"
@@ -67,7 +67,7 @@ v-card(
           :disabled="importing"
           block
         ) 再スキャン
-      
+
       .my-16
 
 v-dialog(
@@ -111,9 +111,9 @@ v-dialog(
 
 <script lang="ts">
   import { QrcodeStream } from 'vue-qrcode-reader'
+  import { decryptData } from '@/js/transferEncryption'
   import { useCardsStore } from '@/stores/cards'
   import { useSettingsStore } from '@/stores/settings'
-  import { decryptData } from '@/js/transferEncryption'
 
   export default {
     components: {
@@ -136,7 +136,7 @@ v-dialog(
     methods: {
       async readQrcode (content: any) {
         const val = content[0].rawValue as string
-        
+
         try {
           // Check if it's a wallet transfer QR code
           if (!val.startsWith('wallet-transfer:')) {
@@ -144,18 +144,18 @@ v-dialog(
             this.importErrorDialog = true
             return
           }
-          
+
           // Extract and parse the data
-          const base64Data = val.substring('wallet-transfer:'.length)
+          const base64Data = val.slice('wallet-transfer:'.length)
           const jsonString = atob(base64Data)
           const transferData = JSON.parse(jsonString)
-          
+
           if (transferData.v !== 1) {
             this.errorMessage = 'サポートされていないバージョンのQRコードです'
             this.importErrorDialog = true
             return
           }
-          
+
           this.encryptedData = transferData.d
           this.scanned = true
         } catch (error) {
@@ -164,37 +164,72 @@ v-dialog(
           this.importErrorDialog = true
         }
       },
-      
+
       async importData () {
         if (!this.password || !this.encryptedData) {
           return
         }
-        
+
         this.importing = true
-        
+
         try {
           // Decrypt the data
           const decrypted = decryptData(this.encryptedData, this.password)
-          
+
           if (!decrypted) {
             this.errorMessage = 'パスワードが間違っているか、データが破損しています'
             this.importErrorDialog = true
             this.importing = false
             return
           }
-          
-          // Validate the decrypted data
-          if (!decrypted.cards || !decrypted.bank) {
-            this.errorMessage = 'データ形式が不正です'
+
+          // Validate version compatibility
+          if (!decrypted.version || decrypted.version !== 1) {
+            this.errorMessage = `サポートされていないバージョンです (v${decrypted.version || 'unknown'})`
             this.importErrorDialog = true
             this.importing = false
             return
           }
-          
+
+          // Validate the decrypted data structure
+          if (!decrypted.cards || !Array.isArray(decrypted.cards)) {
+            this.errorMessage = 'カードデータの形式が不正です'
+            this.importErrorDialog = true
+            this.importing = false
+            return
+          }
+
+          if (!decrypted.bank || !Array.isArray(decrypted.bank)) {
+            this.errorMessage = '銀行口座データの形式が不正です'
+            this.importErrorDialog = true
+            this.importing = false
+            return
+          }
+
+          // Validate card data structure
+          for (const card of decrypted.cards) {
+            if (!card.name || !card.cardNumber || !card.deadlineYYYY || !card.deadlineMM) {
+              this.errorMessage = 'カードデータに必須項目が不足しています'
+              this.importErrorDialog = true
+              this.importing = false
+              return
+            }
+          }
+
+          // Validate bank data structure
+          for (const bank of decrypted.bank) {
+            if (!bank.name || !bank.bankName || !bank.bankCode || !bank.cardNumber) {
+              this.errorMessage = '銀行口座データに必須項目が不足しています'
+              this.importErrorDialog = true
+              this.importing = false
+              return
+            }
+          }
+
           // Import the data
           this.cards.cards = decrypted.cards
           this.cards.bank = decrypted.bank
-          
+
           this.importedData = decrypted
           this.importSuccessDialog = true
           this.importing = false
@@ -205,13 +240,13 @@ v-dialog(
           this.importing = false
         }
       },
-      
+
       resetScan () {
         this.scanned = false
         this.password = ''
         this.encryptedData = ''
       },
-      
+
       closeAndGoHome () {
         this.importSuccessDialog = false
         this.$router.push('/')
