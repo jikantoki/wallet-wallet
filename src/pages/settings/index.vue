@@ -33,6 +33,24 @@ v-card(
           p.description メール、プッシュ通知
       .setting-item(
         v-ripple
+        @click="$router.push('/transfer-export')"
+        )
+        .icon
+          v-icon mdi-qrcode-scan
+        .text
+          p.title データ転送（エクスポート）
+          p.description QRコード+パスワードで他端末へ転送
+      .setting-item(
+        v-ripple
+        @click="$router.push('/transfer-import')"
+        )
+        .icon
+          v-icon mdi-qrcode
+        .text
+          p.title データ転送（インポート）
+          p.description QRコードからデータを受け取る
+      .setting-item(
+        v-ripple
         @click="$router.push('/terms')"
         )
         .icon
