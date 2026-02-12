@@ -33,6 +33,7 @@ v-card(
         required
         prepend-inner-icon="mdi-credit-card"
         @keydown.enter="$refs.deadlineMM.focus()"
+        @input="onCardNumberInput"
         type="number"
         :rules="[v => /[0-9]/.test(v) && v.length <= 16 || '数字のみ16桁まで']"
         hide-spin-buttons
@@ -59,6 +60,7 @@ v-card(
           ref="deadlineMM"
           required
           @keydown.enter="$refs.deadlineYYYY.focus()"
+          @input="onDeadlineMMInput"
           type="number"
           :rules="[v => /[0-9]/.test(v) && v.length <= 2 || '数字のみ2桁まで']"
           hide-spin-buttons
@@ -72,6 +74,7 @@ v-card(
           ref="deadlineYYYY"
           required
           @keydown.enter="$refs.cardCVC.focus()"
+          @input="onDeadlineYYYYInput"
           type="number"
           :rules="[v => /[0-9]/.test(v) && v.length <= 4 || '数字のみ4桁まで']"
           hide-spin-buttons
@@ -86,6 +89,7 @@ v-card(
         required
         prepend-inner-icon="mdi-form-textbox-password"
         @keydown.enter="$refs.ownName.focus()"
+        @input="onCVCInput"
         type="number"
           :rules="[v => /[0-9]/.test(v) && v.length <= 4 || '数字のみ4桁まで']"
         hide-spin-buttons
@@ -192,6 +196,30 @@ v-card(
       /** URLをブラウザで開く */
       async openURL (url: string) {
         await Browser.open({ url: url })
+      },
+      /** カード番号入力時に16桁になったら次のフィールドに移動 */
+      onCardNumberInput () {
+        if (this.editCard.cardNumber?.length === 16) {
+          (this.$refs.deadlineMM as any).focus()
+        }
+      },
+      /** 有効期限MM入力時に2桁になったら次のフィールドに移動 */
+      onDeadlineMMInput () {
+        if (this.editCard.deadlineMM?.length === 2) {
+          (this.$refs.deadlineYYYY as any).focus()
+        }
+      },
+      /** 有効期限YYYY入力時に4桁になったら次のフィールドに移動 */
+      onDeadlineYYYYInput () {
+        if (this.editCard.deadlineYYYY?.length === 4) {
+          (this.$refs.cardCVC as any).focus()
+        }
+      },
+      /** CVC入力時に4桁になったら次のフィールドに移動 */
+      onCVCInput () {
+        if (this.editCard.cvc?.length === 4) {
+          (this.$refs.ownName as any).focus()
+        }
       },
       addCardList (card: Card) {
         if (

@@ -90,6 +90,7 @@ v-card(
         required
         prepend-inner-icon="mdi-credit-card"
         @keydown.enter="$refs.ownName.focus()"
+        @input="onCardNumberInput"
         type="number"
         :rules="[v => /[0-9]/.test(v) && v.length <= 7 || '数字のみ7桁まで']"
         hide-spin-buttons
@@ -256,6 +257,12 @@ v-card(
       /** URLをブラウザで開く */
       async openURL (url: string) {
         await Browser.open({ url: url })
+      },
+      /** 口座番号入力時に7桁になったら次のフィールドに移動 */
+      onCardNumberInput () {
+        if (this.editCard.cardNumber?.length === 7) {
+          (this.$refs.ownName as any).focus()
+        }
       },
       addCardList (card: Bank) {
         if (
