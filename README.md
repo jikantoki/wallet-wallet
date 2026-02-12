@@ -2,7 +2,7 @@
 
 クレカの番号管理
 
-<img src="./public/icon.png" width="256px" alt="アイコン">
+<img src="./thumbnail.jpg" width="512px" alt="アイコン">
 
 ## .envファイル
 
