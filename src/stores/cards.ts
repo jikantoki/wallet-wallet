@@ -16,6 +16,8 @@ export type Card = {
   ownName: string
   /** 何かメモする事項があれば */
   memo: string | null
+  /** 色 */
+  color: string
 }
 
 /** 銀行カードの構造 */
@@ -38,6 +40,8 @@ export type Bank = {
   ownName: string
   /** 何かメモする事項があれば */
   memo: string | null
+  /** 色 */
+  color: string
 }
 
 export const useCardsStore = defineStore('cards', {

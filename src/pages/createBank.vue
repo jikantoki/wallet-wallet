@@ -112,8 +112,23 @@ v-card(
         clearable
         ref="cardMemo"
         prepend-inner-icon="mdi-note-outline"
-        @keydown.enter="$refs.submitButton.focus()"
+        @keydown.enter="$refs.submitButton.$el.focus()"
         )
+      v-text-field(
+        readonly
+        prepend-inner-icon="mdi-palette-outline"
+        hide-details
+        :style="`background-color: ${editCard.color}; transition: .2s;`"
+      ) ↓色を選択↓
+      v-color-picker.my-4(
+        v-model="editCard.color"
+        hide-canvas
+        hide-inputs
+        show-swatches
+        hide-sliders
+        mode="hexa"
+        width="100%"
+      )
     v-card-actions
       v-spacer
       v-btn(
@@ -122,6 +137,7 @@ v-card(
         prepend-icon="mdi-check"
         @click="addCardList(editCard)"
       ) 登録
+    .ma-16
 </template>
 
 <script lang="ts">
@@ -155,6 +171,7 @@ v-card(
           cardNumber: '',
           ownName: '',
           memo: '',
+          color: '',
         } as Bank,
         /** 銀行コード */
         zenginCode,

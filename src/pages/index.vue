@@ -15,6 +15,7 @@ v-card(
       .setting-item(
         @click="openCard(cnt)"
         v-ripple
+        :style="`background-color: ${card.color}bb;`"
         )
         .icon
           v-icon mdi-credit-card
@@ -44,6 +45,7 @@ v-card(
       .setting-item(
         @click="openBank(cnt)"
         v-ripple
+        :style="`background-color: ${card.color}bb;`"
         )
         .icon
           v-icon mdi-bank
