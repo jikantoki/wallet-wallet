@@ -15,9 +15,8 @@ v-card(
     .card-form
       v-text-field(
         v-model="editCard.name"
-        placeholder="○○カード"
-        label="カード名"
-        autocomplete="username"
+        :placeholder="`${searchBrand(editCard.cardNumber) ?? '不明なブランド'}の○○カード`"
+        :label="`${searchBrand(editCard.cardNumber) ? `${searchBrand(editCard.cardNumber)}の○○カード` : 'カード名'}`"
         clearable
         ref="cardName"
         required
@@ -41,7 +40,12 @@ v-card(
         maxlength="16"
         :counter="16"
         )
-      p {{ searchBrand(editCard.cardNumber) ?? '不明なブランド' }}
+      v-text-field(
+        v-model="brand"
+        label="ブランド"
+        prepend-inner-icon="mdi-earth"
+        readonly
+        )
       p 有効期限
       .deadline(
         style="display: flex; gap: 16px;"
@@ -56,7 +60,7 @@ v-card(
           required
           @keydown.enter="$refs.deadlineYYYY.focus()"
           type="number"
-          :rules="[v => /[0-9]/.test(v) && v.length == 2 || '数字のみ2桁']"
+          :rules="[v => /[0-9]/.test(v) && v.length <= 2 || '数字のみ2桁まで']"
           hide-spin-buttons
           )
         v-text-field(
@@ -142,6 +146,12 @@ v-card(
         } as Card,
       }
     },
+    computed: {
+      /** クレカのブランド名 */
+      brand () {
+        return this.searchBrand(this.editCard.cardNumber) ?? '不明なブランド'
+      },
+    },
     async mounted () {
       App.addListener('backButton', () => {
         if (this.editCard.name.length > 0
@@ -167,8 +177,8 @@ v-card(
         await Browser.open({ url: url })
       },
       addCardList (card: Card) {
-        if (this.editCard.name.length > 0
-          && this.editCard.cardNumber.length >= 14
+        if (
+          this.editCard.cardNumber.length >= 14
           && this.editCard.cardNumber.length <= 16
           && this.editCard.deadlineYYYY.length >= 2
           && this.editCard.deadlineYYYY.length <= 4
@@ -178,6 +188,9 @@ v-card(
           && this.editCard.cvc.length <= 4
           && this.editCard.ownName.length > 0
         ) {
+          if (this.editCard.name.length === 0) {
+            this.editCard.name = `${this.brand}のクレジットカード`
+          }
           this.cards.cards.push(card)
           Toast.show({ text: 'カード情報を保存しました' })
           this.$router.push('/')

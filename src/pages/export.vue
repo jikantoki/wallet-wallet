@@ -17,7 +17,8 @@ v-card(
     v-textarea(
       v-model="cardJSON"
       label="クレジットカード設定ファイル"
-      auto-grow
+      no-resize
+      rows="8"
       @keydown="changeCardJSON"
     )
     v-btn.mb-8(
@@ -28,7 +29,8 @@ v-card(
     v-textarea(
       v-model="bankJSON"
       label="銀行口座設定ファイル"
-      auto-grow
+      no-resize
+      rows="8"
       @keydown="changeBankJSON"
     )
     v-btn.mb-8(

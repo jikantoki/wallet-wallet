@@ -15,9 +15,8 @@ v-card(
     .card-form
       v-text-field(
         v-model="editCard.name"
-        :placeholder="editCard.bankName"
+        :placeholder="editCard.bankName.length ? editCard.bankName : '○○銀行のカード'"
         :label="`${editCard.bankName.length ? editCard.bankName : 'カード名'}`"
-        autocomplete="username"
         clearable
         ref="cardName"
         prepend-inner-icon="mdi-tag"
@@ -224,7 +223,6 @@ v-card(
           || this.editCard.cardNumber.length > 0
           || this.editCard.bankName.length > 0
           || this.editCard.shopName.length > 0
-          || this.editCard.type.length > 0
           || this.editCard.ownName.length > 0
           || this.editCard.memo?.length
         ) {

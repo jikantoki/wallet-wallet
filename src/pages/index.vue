@@ -10,18 +10,6 @@ v-card(
   v-card-text(style="height: inherit; overflow-y: auto;")
     h2 クレジットカード（{{ cards.cards.length }}枚）
     .settings-list.my-4(
-      v-if="!cards.cards.length"
-    )
-      .setting-item(
-        @click="$router.push('/create')"
-        v-ripple
-      )
-        .icon
-          v-icon mdi-help
-        .text
-          p クレジットカードが登録されていません
-          p.opacity05 ここをクリックして、新しいカードを追加します
-    .settings-list.my-4(
       v-for="(card, cnt) of cards.cards"
       )
       .setting-item(
@@ -29,7 +17,7 @@ v-card(
         v-ripple
         )
         .icon
-          v-icon mdi-cards
+          v-icon mdi-credit-card
         .text
           h3(
             style="font-size: 1.2em;"
@@ -38,19 +26,18 @@ v-card(
           p.opacity05(
             style="min-height: 1em;"
             ) {{ card.memo.length ? card.memo : '空白のメモ' }}
-    h2 銀行口座（{{ cards.bank.length }}枚）
     .settings-list.my-4(
-      v-if="!cards.bank.length"
     )
       .setting-item(
-        @click="$router.push('/createBank')"
+        @click="$router.push('/create')"
         v-ripple
       )
         .icon
-          v-icon mdi-help
+          v-icon mdi-plus
         .text
-          p 銀行口座が登録されていません
-          p.opacity05 ここをクリックして、新しい銀行口座を追加します
+          p 新しいカードを登録
+          p.opacity05 ここをクリックして、新しいカードを追加します
+    h2 銀行口座（{{ cards.bank.length }}枚）
     .settings-list.my-4(
       v-for="(card, cnt) of cards.bank"
       )
@@ -68,6 +55,18 @@ v-card(
           p.opacity05(
             style="min-height: 1em;"
             ) {{ card.memo.length ? card.memo : '空白のメモ' }}
+    .settings-list.my-4(
+    )
+      .setting-item(
+        @click="$router.push('/createBank')"
+        v-ripple
+      )
+        .icon
+          v-icon mdi-plus
+        .text
+          p 新しい銀行口座を登録
+          p.opacity05 ここをクリックして、新しい銀行口座を追加します
+    .ma-16.pa-16
   //-- 下部のアクションバー --
   .action-bar
     .buttons
@@ -243,7 +242,7 @@ v-card(
             .icon-and-text
               v-icon mdi-cog
               v-list-item-title 設定
-          v-list-item.item( @click="$router.push('/export')" )
+          v-list-item.item( @click="jumpToExport" )
             .icon-and-text
               v-icon mdi-file-import
               v-list-item-title インポート・エクスポート
@@ -295,7 +294,7 @@ v-card(
           readonly
           )
           template(v-slot:append-inner)
-            v-icon(@click.stop="copy(card.cardNumber)") mdi-content-copy
+            v-icon(@click.stop="copy(detailDialogTargetBrand)") mdi-content-copy
         p 有効期限
         .deadline(
           style="display: flex; gap: 16px;"
@@ -571,7 +570,7 @@ v-card(
 </template>
 
 <script lang="ts">
-  import { AndroidBiometryStrength, BiometricAuth, BiometryError, BiometryErrorType, BiometryType } from '@aparajita/capacitor-biometric-auth'
+  import { AndroidBiometryStrength, BiometricAuth, BiometryError, BiometryErrorType } from '@aparajita/capacitor-biometric-auth'
   import { App } from '@capacitor/app'
 
   import { Browser } from '@capacitor/browser'
@@ -718,10 +717,13 @@ v-card(
         } else if (this.deleteBankDialog) {
           /** 削除ダイアログを閉じる */
           this.deleteBankDialog = false
+        } else if (this.createTypeSelectDialog) {
+          /** どの種類のカードを登録する？のダイアログを閉じる */
+          this.createTypeSelectDialog = false
         } else if (this.$route.path === '/') {
           /** ルートページならアプリを最小化 */
           App.minimizeApp()
-          Toast.show({ text: 'アプリはバックグラウンドで実行されます' })
+          // Toast.show({ text: 'アプリはバックグラウンドで実行されます' })
         } else {
           /** ルート以外のページなら1つ戻る */
           this.$router.back()
@@ -912,6 +914,16 @@ v-card(
         if (authResult) {
           this.detailDialogTarget = index
           this.detailDialog = true
+          return true
+        } else {
+          Toast.show({ text: '生体認証に失敗しました' })
+          return false
+        }
+      },
+      async jumpToExport () {
+        const authResult = await this.auth()
+        if (authResult) {
+          this.$router.push('/export')
           return true
         } else {
           Toast.show({ text: '生体認証に失敗しました' })
