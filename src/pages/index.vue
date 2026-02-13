@@ -282,7 +282,7 @@ v-card(
           template(v-slot:append-inner)
             v-icon(@click.stop="copy(card.name)") mdi-content-copy
         v-text-field(
-          :value="detailDialogTargetFormattedCardNumber"
+          v-model="detailDialogTargetFormattedCardNumber"
           label="カード番号（16桁）"
           prepend-inner-icon="mdi-credit-card"
           readonly
