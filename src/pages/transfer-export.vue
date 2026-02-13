@@ -13,9 +13,9 @@ v-card(
       )
   v-card-text(style="height: inherit; overflow-y: auto;")
     .content
-      h2 QRコードでデータを転送
-      p.my-4 カードと銀行口座のデータをQRコードで他の端末に転送できます。パスワードを設定して暗号化されます。
-
+      h2 ファイルでデータを転送
+      p.my-4 カードと銀行口座のデータを暗号化ファイルとして他の端末に転送できます。パスワードで保護されます。
+      
       v-text-field(
         v-model="password"
         label="転送用パスワード"
@@ -26,7 +26,7 @@ v-card(
         prepend-icon="mdi-lock"
         @input="onPasswordChange"
       )
-
+      
       v-text-field.mt-4(
         v-model="passwordConfirm"
         label="パスワード確認"
@@ -35,46 +35,47 @@ v-card(
         prepend-icon="mdi-lock-check"
         @input="onPasswordChange"
       )
-
+      
       v-btn.mt-4(
-        @click="generateQRCode"
-        prepend-icon="mdi-qrcode"
+        @click="exportToFile"
+        prepend-icon="mdi-export"
         style="background-color: rgb(var(--v-theme-primary)); color: white;"
-        :disabled="!canGenerate"
+        :disabled="!canExport"
+        :loading="exporting"
         block
-      ) QRコードを生成
-
-      .qr-display.mt-8(v-if="qrGenerated")
-        h3.mb-4 QRコード
-        p.mb-4 このQRコードをインポート先の端末でスキャンしてください
-        .canvas-area(
-          style="display: flex; justify-content: center;"
-        )
-          canvas#transfer-qr-canvas(
-            v-show="!qrLoading"
-            style="border-radius: 10%; max-width: 20em; max-height: 20em; background: white;"
-          )
-          .qr-loading(
-            v-show="qrLoading"
-            style="width: 70vw; height: 70vw; max-width: 20em; max-height: 20em; background-color: white; border-radius: 10%; display: flex; flex-direction: column; align-items: center; justify-content: center;"
-          )
-            v-progress-circular.my-4(
-              indeterminate
-              :size="64"
-              color="black"
-            )
-            p.my-4(
-              style="color: black;"
-            ) QRコード生成中…
-
+      ) ファイルをエクスポート
+      
+      .info-box.mt-8(v-if="exported")
+        v-icon.mb-2(color="success" size="48") mdi-check-circle
+        h3 エクスポート成功
+        p.mt-2 ファイルが保存されました
+        p
+          strong ファイル名: 
+          | {{ fileName }}
+        
+        .actions.mt-4
+          v-btn.mb-2(
+            @click="shareFile"
+            prepend-icon="mdi-share-variant"
+            style="background-color: rgb(var(--v-theme-primary)); color: white;"
+            block
+          ) ファイルを共有
+          
+          v-btn(
+            @click="copyToClipboard"
+            prepend-icon="mdi-content-copy"
+            variant="outlined"
+            block
+          ) クリップボードにコピー
+        
         .warning.mt-4.pa-4(
           style="background-color: rgba(var(--v-theme-warning), 0.1); border-radius: 8px;"
         )
           v-icon(color="warning") mdi-alert
           p.mt-2
             strong 重要：
-            | QRコードには暗号化されたデータが含まれています。パスワードを忘れないようにしてください。
-
+            | ファイルには暗号化されたデータが含まれています。パスワードを忘れないようにしてください。
+      
       .my-16
 
 v-dialog(
@@ -95,7 +96,10 @@ v-dialog(
 </template>
 
 <script lang="ts">
-  import QRCode from 'qrcode'
+  import { Filesystem, Directory } from '@capacitor/filesystem'
+  import { Share } from '@capacitor/share'
+  import { Clipboard } from '@capacitor/clipboard'
+  import { Toast } from '@capacitor/toast'
   import { encryptData } from '@/js/transferEncryption'
   import { useCardsStore } from '@/stores/cards'
   import { useSettingsStore } from '@/stores/settings'
@@ -107,34 +111,36 @@ v-dialog(
         cards: useCardsStore(),
         password: '',
         passwordConfirm: '',
-        qrGenerated: false,
-        qrLoading: false,
+        exported: false,
+        exporting: false,
         errorDialog: false,
         errorMessage: '',
+        fileName: '',
+        fileUri: '',
+        encryptedContent: '',
       }
     },
     computed: {
-      canGenerate (): boolean {
+      canExport (): boolean {
         return this.password.length >= 8
           && this.password === this.passwordConfirm
       },
     },
     methods: {
       onPasswordChange () {
-        this.qrGenerated = false
+        this.exported = false
       },
-      async generateQRCode () {
-        if (!this.canGenerate) {
+      async exportToFile () {
+        if (!this.canExport) {
           return
         }
 
-        this.qrLoading = true
-        this.qrGenerated = true
+        this.exporting = true
 
         try {
           // エクスポートするデータを準備
           // version: 将来の互換性チェック用のデータフォーマットバージョン
-          // timestamp: エクスポートのタイムスタンプ（現在は検証に使用していない）
+          // timestamp: エクスポートのタイムスタンプ
           const exportData = {
             cards: this.cards.cards,
             bank: this.cards.bank,
@@ -144,48 +150,65 @@ v-dialog(
 
           // データを暗号化
           const encryptedData = encryptData(exportData, this.password)
+          
+          // ファイル名を生成（タイムスタンプ付き）
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
+          this.fileName = `wallet-backup-${timestamp}.wlt`
+          
+          // ファイルに保存
+          const result = await Filesystem.writeFile({
+            path: this.fileName,
+            data: encryptedData,
+            directory: Directory.Cache,
+            recursive: true,
+          })
+          
+          this.fileUri = result.uri
+          this.encryptedContent = encryptedData
+          this.exported = true
+          this.exporting = false
 
-          // 暗号化されたデータで転送URLを作成
-          const transferData = {
-            d: encryptedData, // 暗号化されたデータ
-            v: 1, // バージョン
-          }
-          const dataString = JSON.stringify(transferData)
-
-          // QRコードにはURLスキームを使用
-          const qrData = `wallet-transfer:${btoa(dataString)}`
-
-          // DOMの準備を待つ
-          await new Promise(resolve => setTimeout(resolve, 100))
-
-          // QRコードを生成
-          const canvas = document.querySelector('#transfer-qr-canvas') as any
-          if (!canvas) {
-            console.error('キャンバスが見つかりません')
-            this.qrLoading = false
-            return
-          }
-
-          await QRCode.toCanvas(
-            canvas,
-            qrData,
-            {
-              scale: 8,
-              margin: 2,
-              errorCorrectionLevel: 'M',
-            },
-          )
-
-          canvas.style.height = '70vw'
-          canvas.style.width = '70vw'
-
-          this.qrLoading = false
+          await Toast.show({
+            text: 'ファイルをエクスポートしました',
+            duration: 'short',
+          })
         } catch (error) {
-          console.error('QRコード生成に失敗しました:', error)
-          this.errorMessage = 'QRコード生成に失敗しました'
+          console.error('ファイルエクスポートに失敗しました:', error)
+          this.errorMessage = 'ファイルのエクスポートに失敗しました'
           this.errorDialog = true
-          this.qrLoading = false
-          this.qrGenerated = false
+          this.exporting = false
+          this.exported = false
+        }
+      },
+      
+      async shareFile () {
+        try {
+          await Share.share({
+            title: 'Wallet Wallet バックアップ',
+            text: `Wallet Walletのバックアップファイルです。パスワードが必要です。`,
+            url: this.fileUri,
+            dialogTitle: 'バックアップを共有',
+          })
+        } catch (error) {
+          console.error('ファイル共有に失敗しました:', error)
+          // ユーザーがキャンセルした場合もエラーになるので、エラーダイアログは表示しない
+        }
+      },
+      
+      async copyToClipboard () {
+        try {
+          await Clipboard.write({
+            string: this.encryptedContent,
+          })
+          
+          await Toast.show({
+            text: 'クリップボードにコピーしました',
+            duration: 'short',
+          })
+        } catch (error) {
+          console.error('クリップボードへのコピーに失敗しました:', error)
+          this.errorMessage = 'クリップボードへのコピーに失敗しました'
+          this.errorDialog = true
         }
       },
     },
@@ -202,9 +225,10 @@ v-dialog(
   margin: 0 auto;
 }
 
-.qr-display {
+.info-box {
   border: 1px solid rgba(var(--v-theme-on-surface), 0.1);
   border-radius: 8px;
-  padding: 1em;
+  padding: 1.5em;
+  text-align: center;
 }
 </style>

@@ -13,9 +13,9 @@ v-card(
       )
   v-card-text(style="height: inherit; overflow-y: auto;")
     .content
-      h2 QRコードからデータをインポート
-      p.my-4 転送元の端末で生成したQRコードをスキャンして、データをインポートします。
-
+      h2 ファイルからデータをインポート
+      p.my-4 転送元の端末で生成したファイルを選択して、データをインポートします。
+      
       v-alert.my-4(
         type="warning"
         variant="tonal"
@@ -23,23 +23,33 @@ v-card(
         | 既存のカードと銀行口座データは
         strong 上書き
         | されます。事前にバックアップを取ることをお勧めします。
-
-      .qrcode-stream.my-4(
-        v-if="!scanned"
-        style="background-color: white;position: relative;"
-      )
-        QrcodeStream(
-          @detect="readQrcode"
-          style="position: absolute;"
-        )
-        .scan-wrap(
-          style="width: 100%; height: 100%;z-index: 999;position: absolute;"
-        )
-
-      .scanned-content.my-4(v-if="scanned")
-        v-icon.mb-2(color="success" size="64") mdi-check-circle
-        h3 QRコードをスキャンしました
-
+      
+      .import-method.my-4
+        h3.mb-4 インポート方法を選択
+        
+        v-btn.mb-3(
+          @click="selectFile"
+          prepend-icon="mdi-file-upload"
+          style="background-color: rgb(var(--v-theme-primary)); color: white;"
+          :disabled="importing"
+          block
+        ) ファイルを選択
+        
+        v-btn(
+          @click="pasteFromClipboard"
+          prepend-icon="mdi-content-paste"
+          variant="outlined"
+          :disabled="importing"
+          block
+        ) クリップボードから貼り付け
+      
+      .file-info.my-4(v-if="fileLoaded")
+        v-icon.mb-2(color="success" size="48") mdi-file-check
+        h3 ファイルを読み込みました
+        p.mt-2(v-if="fileName")
+          strong ファイル名: 
+          | {{ fileName }}
+        
         v-text-field.mt-4(
           v-model="password"
           label="転送用パスワード"
@@ -50,7 +60,7 @@ v-card(
           prepend-icon="mdi-lock"
           :disabled="importing"
         )
-
+        
         v-btn.mt-4(
           @click="importData"
           prepend-icon="mdi-database-import"
@@ -59,15 +69,15 @@ v-card(
           :loading="importing"
           block
         ) データをインポート
-
+        
         v-btn.mt-2(
-          @click="resetScan"
+          @click="resetImport"
           prepend-icon="mdi-refresh"
           variant="text"
           :disabled="importing"
           block
-        ) 再スキャン
-
+        ) リセット
+      
       .my-16
 
 v-dialog(
@@ -110,23 +120,23 @@ v-dialog(
 </template>
 
 <script lang="ts">
-  import { QrcodeStream } from 'vue-qrcode-reader'
-  import { decryptData } from '@/js/transferEncryption'
+  import { Filesystem, Directory } from '@capacitor/filesystem'
+  import { Clipboard } from '@capacitor/clipboard'
+  import { Toast } from '@capacitor/toast'
   import { useCardsStore } from '@/stores/cards'
   import { useSettingsStore } from '@/stores/settings'
+  import { decryptData } from '@/js/transferEncryption'
 
   export default {
-    components: {
-      QrcodeStream,
-    },
     data () {
       return {
         settings: useSettingsStore(),
         cards: useCardsStore(),
         password: '',
-        scanned: false,
+        fileLoaded: false,
         importing: false,
         encryptedData: '',
+        fileName: '',
         importSuccessDialog: false,
         importErrorDialog: false,
         errorMessage: '',
@@ -134,37 +144,65 @@ v-dialog(
       }
     },
     methods: {
-      async readQrcode (content: any) {
-        const val = content[0].rawValue as string
-
+      async selectFile () {
         try {
-          // Wallet Wallet転送用のQRコードかどうかをチェック
-          if (!val.startsWith('wallet-transfer:')) {
-            this.errorMessage = 'これはWallet Wallet転送用のQRコードではありません'
-            this.importErrorDialog = true
-            return
+          // ファイルピッカーを使用してファイルを選択
+          // Capacitorのファイルピッカーはプラグインが必要なので、
+          // 代わりにinput[type=file]を使用
+          const input = document.createElement('input')
+          input.type = 'file'
+          input.accept = '.wlt,.txt'
+          
+          input.onchange = async (e: any) => {
+            const file = e.target.files[0]
+            if (!file) return
+            
+            this.fileName = file.name
+            
+            const reader = new FileReader()
+            reader.onload = (e: any) => {
+              this.encryptedData = e.target.result
+              this.fileLoaded = true
+            }
+            reader.onerror = () => {
+              this.errorMessage = 'ファイルの読み込みに失敗しました'
+              this.importErrorDialog = true
+            }
+            reader.readAsText(file)
           }
-
-          // データを抽出して解析
-          const base64Data = val.slice('wallet-transfer:'.length)
-          const jsonString = atob(base64Data)
-          const transferData = JSON.parse(jsonString)
-
-          if (transferData.v !== 1) {
-            this.errorMessage = 'サポートされていないバージョンのQRコードです'
-            this.importErrorDialog = true
-            return
-          }
-
-          this.encryptedData = transferData.d
-          this.scanned = true
+          
+          input.click()
         } catch (error) {
-          console.error('QRコードの解析に失敗しました:', error)
-          this.errorMessage = 'QRコードの読み取りに失敗しました'
+          console.error('ファイル選択に失敗しました:', error)
+          this.errorMessage = 'ファイルの選択に失敗しました'
           this.importErrorDialog = true
         }
       },
-
+      
+      async pasteFromClipboard () {
+        try {
+          const result = await Clipboard.read()
+          
+          if (result.value) {
+            this.encryptedData = result.value
+            this.fileName = 'クリップボードから'
+            this.fileLoaded = true
+            
+            await Toast.show({
+              text: 'クリップボードから読み込みました',
+              duration: 'short',
+            })
+          } else {
+            this.errorMessage = 'クリップボードにデータがありません'
+            this.importErrorDialog = true
+          }
+        } catch (error) {
+          console.error('クリップボードからの読み込みに失敗しました:', error)
+          this.errorMessage = 'クリップボードからの読み込みに失敗しました'
+          this.importErrorDialog = true
+        }
+      },
+      
       async importData () {
         if (!this.password || !this.encryptedData) {
           return
@@ -240,13 +278,14 @@ v-dialog(
           this.importing = false
         }
       },
-
-      resetScan () {
-        this.scanned = false
+      
+      resetImport () {
+        this.fileLoaded = false
         this.password = ''
         this.encryptedData = ''
+        this.fileName = ''
       },
-
+      
       closeAndGoHome () {
         this.importSuccessDialog = false
         this.$router.push('/')
@@ -265,15 +304,16 @@ v-dialog(
   margin: 0 auto;
 }
 
-.qrcode-stream {
-  width: 95%;
-  height: calc(50vh - 40px - 16px);
-  border-radius: 32px;
-  overflow: hidden;
-  margin: 0 auto;
+.file-info {
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.1);
+  border-radius: 8px;
+  padding: 1.5em;
+  text-align: center;
 }
 
-.scanned-content {
-  text-align: center;
+.import-method {
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.1);
+  border-radius: 8px;
+  padding: 1.5em;
 }
 </style>
