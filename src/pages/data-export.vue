@@ -254,7 +254,6 @@ v-dialog(
   import { Clipboard } from '@capacitor/clipboard'
   import { Capacitor } from '@capacitor/core'
   import { Directory, Filesystem } from '@capacitor/filesystem'
-  import { Share } from '@capacitor/share'
   import { Toast } from '@capacitor/toast'
   import { encryptData } from '@/js/transferEncryption'
   import { useCardsStore } from '@/stores/cards'
@@ -287,7 +286,6 @@ v-dialog(
         errorDialog: false,
         errorMessage: '',
         fileName: '',
-        fileUri: '',
         encryptedContent: '',
       }
     },
@@ -375,31 +373,18 @@ v-dialog(
         const platform = Capacitor.getPlatform()
 
         if (platform === 'android') {
-          // Androidの場合: Filesystemプラグインでファイルを保存してからShareで共有
+          // Androidの場合: Filesystemプラグインでドキュメントフォルダに保存
           try {
-            const result = await Filesystem.writeFile({
+            await Filesystem.writeFile({
               path: filename,
               data: content,
-              directory: Directory.Cache,
+              directory: Directory.Documents,
             })
 
-            await Share.share({
-              title: 'ファイルを保存',
-              text: 'データをエクスポートしました',
-              url: result.uri,
-              dialogTitle: 'ファイルの保存先を選択',
+            await Toast.show({
+              text: `ファイルを保存しました: ${filename}`,
+              duration: 'long',
             })
-
-            // 共有後、キャッシュファイルを削除
-            try {
-              await Filesystem.deleteFile({
-                path: filename,
-                directory: Directory.Cache,
-              })
-            } catch (cleanupError) {
-              // クリーンアップエラーは無視（次回起動時にOSが削除する可能性がある）
-              console.warn('キャッシュファイルの削除に失敗しました:', cleanupError)
-            }
           } catch (error) {
             console.error('ファイル保存に失敗しました:', error)
             await Toast.show({
@@ -452,15 +437,6 @@ v-dialog(
           const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
           this.fileName = `wallet-backup-${timestamp}.wlt`
 
-          // ファイルに保存
-          const result = await Filesystem.writeFile({
-            path: this.fileName,
-            data: encryptedData,
-            directory: Directory.Cache,
-            recursive: true,
-          })
-
-          this.fileUri = result.uri
           this.encryptedContent = encryptedData
           this.exported = true
           this.exporting = false
@@ -482,27 +458,20 @@ v-dialog(
         const platform = Capacitor.getPlatform()
 
         if (platform === 'android') {
-          // Androidの場合: Shareプラグインを使用
+          // Androidの場合: Filesystemプラグインでドキュメントフォルダに保存
           try {
-            await Share.share({
-              title: 'バックアップファイルを保存',
-              text: '暗号化されたバックアップデータです',
-              url: this.fileUri,
-              dialogTitle: 'ファイルの保存先を選択',
+            await Filesystem.writeFile({
+              path: this.fileName,
+              data: this.encryptedContent,
+              directory: Directory.Documents,
             })
 
-            // 共有後、キャッシュファイルを削除
-            try {
-              await Filesystem.deleteFile({
-                path: this.fileName,
-                directory: Directory.Cache,
-              })
-            } catch (cleanupError) {
-              // クリーンアップエラーは無視（次回起動時にOSが削除する可能性がある）
-              console.warn('キャッシュファイルの削除に失敗しました:', cleanupError)
-            }
+            await Toast.show({
+              text: `ファイルを保存しました: ${this.fileName}`,
+              duration: 'long',
+            })
           } catch (error) {
-            console.error('ファイル共有に失敗しました:', error)
+            console.error('ファイル保存に失敗しました:', error)
             this.errorMessage = 'ファイルの保存に失敗しました'
             this.errorDialog = true
           }
