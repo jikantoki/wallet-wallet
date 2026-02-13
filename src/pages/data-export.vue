@@ -260,6 +260,10 @@ v-dialog(
   import { useCardsStore } from '@/stores/cards'
   import { useSettingsStore } from '@/stores/settings'
 
+  // ファイルダウンロード後のクリーンアップまでの待機時間（ミリ秒）
+  // ブラウザがダウンロードを開始する前にBlobURLが解放されないようにするため
+  const CLEANUP_DELAY_MS = 300
+
   export default {
     data () {
       return {
@@ -409,7 +413,7 @@ v-dialog(
           window.setTimeout(() => {
             link.remove()
             URL.revokeObjectURL(url)
-          }, 300)
+          }, CLEANUP_DELAY_MS)
         }
       },
 
@@ -500,7 +504,7 @@ v-dialog(
           a.click()
           window.setTimeout(() => {
             URL.revokeObjectURL(fileUrl)
-          }, 300)
+          }, CLEANUP_DELAY_MS)
         }
       },
 
