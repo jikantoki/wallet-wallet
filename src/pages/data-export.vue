@@ -253,7 +253,7 @@ v-dialog(
   import { Browser } from '@capacitor/browser'
   import { Clipboard } from '@capacitor/clipboard'
   import { Capacitor } from '@capacitor/core'
-  import { Directory, Filesystem } from '@capacitor/filesystem'
+  import { Directory, Encoding, Filesystem } from '@capacitor/filesystem'
   import { Toast } from '@capacitor/toast'
   import { encryptData } from '@/js/transferEncryption'
   import { useCardsStore } from '@/stores/cards'
@@ -379,16 +379,17 @@ v-dialog(
               path: filename,
               data: content,
               directory: Directory.Documents,
+              encoding: Encoding.UTF8,
             })
 
             await Toast.show({
-              text: `ファイルを保存しました: ${filename}`,
+              text: `ドキュメントにファイルを保存しました: ${filename}`,
               duration: 'long',
             })
           } catch (error) {
             console.error('ファイル保存に失敗しました:', error)
             await Toast.show({
-              text: 'ファイル保存に失敗しました',
+              text: 'ドキュメントへのファイル保存に失敗しました',
               duration: 'short',
             })
           }
@@ -440,11 +441,6 @@ v-dialog(
           this.encryptedContent = encryptedData
           this.exported = true
           this.exporting = false
-
-          await Toast.show({
-            text: 'ファイルをエクスポートしました',
-            duration: 'short',
-          })
         } catch (error) {
           console.error('ファイルエクスポートに失敗しました:', error)
           this.errorMessage = 'ファイルのエクスポートに失敗しました'
@@ -464,10 +460,11 @@ v-dialog(
               path: this.fileName,
               data: this.encryptedContent,
               directory: Directory.Documents,
+              encoding: Encoding.UTF8,
             })
 
             await Toast.show({
-              text: `ファイルを保存しました: ${this.fileName}`,
+              text: `ドキュメントにファイルを保存しました: ${this.fileName}`,
               duration: 'long',
             })
           } catch (error) {
