@@ -150,6 +150,8 @@ v-card(
         bankJSONError: '',
         warningDialog: false,
         downloadTarget: '' as 'card' | 'bank' | '',
+        cardValidationTimeout: null as number | null,
+        bankValidationTimeout: null as number | null,
       }
     },
     async mounted () {
@@ -163,23 +165,33 @@ v-card(
       },
       /** クレジットカードJSONの検証 */
       validateCardJSON () {
-        try {
-          const data = JSON.parse(this.cardJSON)
-          this.cards.cards = data
-          this.cardJSONError = ''
-        } catch (error) {
-          this.cardJSONError = error instanceof Error ? `JSONパースエラー: ${error.message}` : 'JSONパースエラーが発生しました'
+        if (this.cardValidationTimeout) {
+          clearTimeout(this.cardValidationTimeout)
         }
+        this.cardValidationTimeout = window.setTimeout(() => {
+          try {
+            const data = JSON.parse(this.cardJSON)
+            this.cards.cards = data
+            this.cardJSONError = ''
+          } catch (error) {
+            this.cardJSONError = error instanceof Error ? `JSONパースエラー: ${error.message}` : 'JSONパースエラーが発生しました'
+          }
+        }, 500)
       },
       /** 銀行口座JSONの検証 */
       validateBankJSON () {
-        try {
-          const data = JSON.parse(this.bankJSON)
-          this.cards.bank = data
-          this.bankJSONError = ''
-        } catch (error) {
-          this.bankJSONError = error instanceof Error ? `JSONパースエラー: ${error.message}` : 'JSONパースエラーが発生しました'
+        if (this.bankValidationTimeout) {
+          clearTimeout(this.bankValidationTimeout)
         }
+        this.bankValidationTimeout = window.setTimeout(() => {
+          try {
+            const data = JSON.parse(this.bankJSON)
+            this.cards.bank = data
+            this.bankJSONError = ''
+          } catch (error) {
+            this.bankJSONError = error instanceof Error ? `JSONパースエラー: ${error.message}` : 'JSONパースエラーが発生しました'
+          }
+        }, 500)
       },
       /** クリップボードにコピー */
       async copy (content: string) {
