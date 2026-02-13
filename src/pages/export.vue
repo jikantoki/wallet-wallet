@@ -29,7 +29,7 @@ v-card(
       v-card-title.bg-primary
         v-icon.mr-2 mdi-credit-card
         span クレジットカード設定ファイル
-      v-card-text
+      v-card-text.pt-4
         v-textarea(
           v-model="cardJSON"
           variant="outlined"
@@ -38,7 +38,7 @@ v-card(
           @input="validateCardJSON"
           :error="!!cardJSONError"
         )
-        v-alert(
+        v-alert.mb-4(
           v-if="cardJSONError"
           type="error"
           variant="tonal"
@@ -46,7 +46,9 @@ v-card(
           class="mb-2"
           icon="mdi-alert-circle"
         ) {{ cardJSONError }}
-        .d-flex.gap-2
+        .d-flex(
+          style="gap: 8px;"
+        )
           v-btn(
             prepend-icon="mdi-content-copy"
             color="primary"
@@ -65,7 +67,7 @@ v-card(
       v-card-title.bg-primary
         v-icon.mr-2 mdi-bank
         span 銀行口座設定ファイル
-      v-card-text
+      v-card-text.pt-4
         v-textarea(
           v-model="bankJSON"
           variant="outlined"
@@ -74,7 +76,7 @@ v-card(
           @input="validateBankJSON"
           :error="!!bankJSONError"
         )
-        v-alert(
+        v-alert.mb-4(
           v-if="bankJSONError"
           type="error"
           variant="tonal"
@@ -82,7 +84,9 @@ v-card(
           class="mb-2"
           icon="mdi-alert-circle"
         ) {{ bankJSONError }}
-        .d-flex.gap-2
+        .d-flex(
+          style="gap: 8px;"
+        )
           v-btn(
             prepend-icon="mdi-content-copy"
             color="primary"
@@ -95,9 +99,7 @@ v-card(
             variant="elevated"
             @click="downloadBankJSON"
           ) ダウンロード
-
-    .my-16
-
+    .my-16.pa-4
   //-- 個人情報警告ダイアログ --
   v-dialog(
     v-model="warningDialog"
