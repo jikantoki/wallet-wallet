@@ -1,14 +1,14 @@
 /**
- * Transfer encryption utility for wallet data transfer between devices
- * Uses SecureLS for AES encryption with user-provided password
+ * デバイス間でのウォレットデータ転送用の暗号化ユーティリティ
+ * ユーザー提供のパスワードでSecureLSを使用したAES暗号化を行う
  */
 import SecureLS from 'secure-ls'
 
 /**
- * Encrypt data with password
- * @param data - Data object to encrypt
- * @param password - User password
- * @returns Encrypted string
+ * パスワードでデータを暗号化
+ * @param data - 暗号化するデータオブジェクト
+ * @param password - ユーザーパスワード
+ * @returns 暗号化された文字列
  */
 export function encryptData (data: any, password: string): string {
   const ls = new SecureLS({
@@ -18,21 +18,21 @@ export function encryptData (data: any, password: string): string {
   })
 
   try {
-    // Use a temporary key to encrypt the data
+    // 一時キーを使用してデータを暗号化
     ls.set('_temp_transfer_data', data)
     const encrypted = localStorage.getItem('_temp_transfer_data') || ''
     return encrypted
   } finally {
-    // Ensure cleanup even if an error occurs
+    // エラーが発生してもクリーンアップを確実に実行
     localStorage.removeItem('_temp_transfer_data')
   }
 }
 
 /**
- * Decrypt data with password
- * @param encryptedData - Encrypted string
- * @param password - User password
- * @returns Decrypted data object or null if decryption fails
+ * パスワードでデータを復号化
+ * @param encryptedData - 暗号化された文字列
+ * @param password - ユーザーパスワード
+ * @returns 復号化されたデータオブジェクト、失敗時はnull
  */
 export function decryptData (encryptedData: string, password: string): any | null {
   const ls = new SecureLS({
@@ -42,15 +42,15 @@ export function decryptData (encryptedData: string, password: string): any | nul
   })
 
   try {
-    // Store the encrypted data temporarily and decrypt it
+    // 暗号化されたデータを一時的に保存して復号化
     localStorage.setItem('_temp_transfer_data', encryptedData)
     const decrypted = ls.get('_temp_transfer_data')
     return decrypted
   } catch (error) {
-    console.error('Decryption failed:', error)
+    console.error('復号化に失敗しました:', error)
     return null
   } finally {
-    // Ensure cleanup even if decryption fails
+    // 復号化が失敗してもクリーンアップを確実に実行
     localStorage.removeItem('_temp_transfer_data')
   }
 }

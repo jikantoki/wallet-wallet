@@ -138,14 +138,14 @@ v-dialog(
         const val = content[0].rawValue as string
 
         try {
-          // Check if it's a wallet transfer QR code
+          // Wallet Wallet転送用のQRコードかどうかをチェック
           if (!val.startsWith('wallet-transfer:')) {
             this.errorMessage = 'これはWallet Wallet転送用のQRコードではありません'
             this.importErrorDialog = true
             return
           }
 
-          // Extract and parse the data
+          // データを抽出して解析
           const base64Data = val.slice('wallet-transfer:'.length)
           const jsonString = atob(base64Data)
           const transferData = JSON.parse(jsonString)
@@ -159,7 +159,7 @@ v-dialog(
           this.encryptedData = transferData.d
           this.scanned = true
         } catch (error) {
-          console.error('QR code parsing failed:', error)
+          console.error('QRコードの解析に失敗しました:', error)
           this.errorMessage = 'QRコードの読み取りに失敗しました'
           this.importErrorDialog = true
         }
@@ -173,7 +173,7 @@ v-dialog(
         this.importing = true
 
         try {
-          // Decrypt the data
+          // データを復号化
           const decrypted = decryptData(this.encryptedData, this.password)
 
           if (!decrypted) {
@@ -183,7 +183,7 @@ v-dialog(
             return
           }
 
-          // Validate version compatibility
+          // バージョンの互換性を検証
           if (!decrypted.version || decrypted.version !== 1) {
             this.errorMessage = `サポートされていないバージョンです (v${decrypted.version || 'unknown'})`
             this.importErrorDialog = true
@@ -191,7 +191,7 @@ v-dialog(
             return
           }
 
-          // Validate the decrypted data structure
+          // 復号化されたデータ構造を検証
           if (!decrypted.cards || !Array.isArray(decrypted.cards)) {
             this.errorMessage = 'カードデータの形式が不正です'
             this.importErrorDialog = true
@@ -206,7 +206,7 @@ v-dialog(
             return
           }
 
-          // Validate card data structure
+          // カードデータ構造を検証
           for (const card of decrypted.cards) {
             if (!card.name || !card.cardNumber || !card.deadlineYYYY || !card.deadlineMM) {
               this.errorMessage = 'カードデータに必須項目が不足しています'
@@ -216,7 +216,7 @@ v-dialog(
             }
           }
 
-          // Validate bank data structure
+          // 銀行口座データ構造を検証
           for (const bank of decrypted.bank) {
             if (!bank.name || !bank.bankName || !bank.bankCode || !bank.cardNumber) {
               this.errorMessage = '銀行口座データに必須項目が不足しています'
@@ -226,7 +226,7 @@ v-dialog(
             }
           }
 
-          // Import the data
+          // データをインポート
           this.cards.cards = decrypted.cards
           this.cards.bank = decrypted.bank
 
@@ -234,7 +234,7 @@ v-dialog(
           this.importSuccessDialog = true
           this.importing = false
         } catch (error) {
-          console.error('Import failed:', error)
+          console.error('インポートに失敗しました:', error)
           this.errorMessage = 'データのインポートに失敗しました'
           this.importErrorDialog = true
           this.importing = false

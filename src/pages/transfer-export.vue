@@ -132,9 +132,9 @@ v-dialog(
         this.qrGenerated = true
 
         try {
-          // Prepare data to export
-          // version: Data format version for future compatibility checks
-          // timestamp: Export timestamp for reference (not currently used in validation)
+          // エクスポートするデータを準備
+          // version: 将来の互換性チェック用のデータフォーマットバージョン
+          // timestamp: エクスポートのタイムスタンプ（現在は検証に使用していない）
           const exportData = {
             cards: this.cards.cards,
             bank: this.cards.bank,
@@ -142,26 +142,26 @@ v-dialog(
             timestamp: new Date().toISOString(),
           }
 
-          // Encrypt the data
+          // データを暗号化
           const encryptedData = encryptData(exportData, this.password)
 
-          // Create transfer URL with encrypted data
+          // 暗号化されたデータで転送URLを作成
           const transferData = {
-            d: encryptedData, // encrypted data
-            v: 1, // version
+            d: encryptedData, // 暗号化されたデータ
+            v: 1, // バージョン
           }
           const dataString = JSON.stringify(transferData)
 
-          // For QR code, we'll use a URL scheme
+          // QRコードにはURLスキームを使用
           const qrData = `wallet-transfer:${btoa(dataString)}`
 
-          // Wait a bit for DOM to be ready
+          // DOMの準備を待つ
           await new Promise(resolve => setTimeout(resolve, 100))
 
-          // Generate QR code
+          // QRコードを生成
           const canvas = document.querySelector('#transfer-qr-canvas') as any
           if (!canvas) {
-            console.error('Canvas not found')
+            console.error('キャンバスが見つかりません')
             this.qrLoading = false
             return
           }
@@ -181,7 +181,7 @@ v-dialog(
 
           this.qrLoading = false
         } catch (error) {
-          console.error('QR code generation failed:', error)
+          console.error('QRコード生成に失敗しました:', error)
           this.errorMessage = 'QRコード生成に失敗しました'
           this.errorDialog = true
           this.qrLoading = false
