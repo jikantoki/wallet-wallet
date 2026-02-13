@@ -186,7 +186,7 @@ v-card(
           } catch (error) {
             this.cardJSONError = error instanceof Error ? `JSONパースエラー: ${error.message}` : 'JSONパースエラーが発生しました'
           }
-        }, 500)
+        }, 10)
       },
       /** 銀行口座JSONの検証 */
       validateBankJSON () {
@@ -201,7 +201,7 @@ v-card(
           } catch (error) {
             this.bankJSONError = error instanceof Error ? `JSONパースエラー: ${error.message}` : 'JSONパースエラーが発生しました'
           }
-        }, 500)
+        }, 10)
       },
       /** クリップボードにコピー */
       async copy (content: string) {
