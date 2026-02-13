@@ -381,7 +381,7 @@ v-dialog(
 
             await Share.share({
               title: 'ファイルを保存',
-              text: filename,
+              text: 'データをエクスポートしました',
               url: result.uri,
               dialogTitle: 'ファイルの保存先を選択',
             })
@@ -476,7 +476,7 @@ v-dialog(
           try {
             await Share.share({
               title: 'バックアップファイルを保存',
-              text: this.fileName,
+              text: '暗号化されたバックアップデータです',
               url: this.fileUri,
               dialogTitle: 'ファイルの保存先を選択',
             })
