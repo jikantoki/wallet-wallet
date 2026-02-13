@@ -36,9 +36,9 @@ v-card(
         prepend-inner-icon="mdi-credit-card"
         @keydown.enter="$refs.deadlineMM.focus()"
         type="text"
-        :rules="[v => /^[0-9\s]*$/.test(v) && (v.replace(/\s/g, '').length >= 14 && v.replace(/\s/g, '').length <= 16 || v.replace(/\s/g, '').length === 0) || '数字のみ14〜16桁']"
+        @input="onCardNumberInput"
+        :rules="[() => /^[0-9\s]*$/.test(cardNumberWithoutSpaces) && (cardNumberWithoutSpaces.length >= 14 && cardNumberWithoutSpaces.length <= 16 || cardNumberWithoutSpaces.length === 0) || '数字のみ14〜16桁']"
         maxlength="19"
-        :counter="19"
         )
       v-text-field(
         v-model="brand"
@@ -202,7 +202,7 @@ v-card(
       },
       /** カード番号入力時に16桁になったら次のフィールドに移動 */
       onCardNumberInput () {
-        if (this.editCard.cardNumber?.length === 16) {
+        if (this.cardNumberWithoutSpaces?.length === 16) {
           (this.$refs.deadlineMM as any).focus()
         }
       },
@@ -224,7 +224,7 @@ v-card(
           (this.$refs.ownName as any).focus()
         }
       },
-      addCardList (card: Card) {
+      async addCardList (card: Card) {
         if (
           this.cardNumberWithoutSpaces.length >= 14
           && this.cardNumberWithoutSpaces.length <= 16
@@ -239,7 +239,18 @@ v-card(
           if (this.editCard.name.length === 0) {
             this.editCard.name = `${this.brand}のクレジットカード`
           }
-          this.cards.cards.push(card)
+          // なぜかこうしないとcardNumberにスペースが入る
+          this.cards.cards.push({
+            name: this.editCard.name,
+            cardNumber: this.cardNumberWithoutSpaces,
+            deadlineYYYY: this.editCard.deadlineYYYY,
+            deadlineMM: this.editCard.deadlineMM,
+            cvc: this.editCard.cvc,
+            ownName: this.editCard.ownName,
+            memo: this.editCard.memo,
+            color: this.editCard.color,
+          })
+          console.log(this.cards.cards.at(-1))
           Toast.show({ text: 'カード情報を保存しました' })
           this.$router.push('/')
         } else {
