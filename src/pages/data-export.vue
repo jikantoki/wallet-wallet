@@ -139,6 +139,8 @@ v-card(
           v-model="password"
           label="転送用パスワード"
           type="password"
+          autocomplete="new-password"
+          name="pw1"
           :rules="[v => !!v || 'パスワードは必須です', v => v.length >= 8 || '8文字以上入力してください']"
           hint="8文字以上のパスワードを入力してください"
           persistent-hint
@@ -150,6 +152,8 @@ v-card(
           v-model="passwordConfirm"
           label="パスワード確認"
           type="password"
+          autocomplete="new-password"
+          name="pw2"
           :rules="[v => !!v || 'パスワード確認は必須です', v => v === password || 'パスワードが一致しません']"
           prepend-icon="mdi-lock-check"
           @input="onPasswordChange"

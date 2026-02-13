@@ -179,6 +179,8 @@ v-card(
             v-model="password"
             label="転送用パスワード"
             type="password"
+            autocomplete="current-password"
+            name="ipw"
             :rules="[v => !!v || 'パスワードは必須です']"
             hint="エクスポート時に設定したパスワードを入力してください"
             persistent-hint
@@ -436,7 +438,7 @@ v-dialog(
           // 現時点では公式プラグインがないため、代替手段としてHTMLのinput要素を使用
           const input = document.createElement('input')
           input.type = 'file'
-          input.accept = '.wlt,.txt'
+          input.accept = '.wlt'
 
           input.addEventListener('change', async (e: any) => {
             const file = e.target.files[0]
