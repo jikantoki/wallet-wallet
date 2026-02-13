@@ -15,8 +15,8 @@ v-card(
     .card-form
       v-text-field(
         v-model="editCard.name"
-        :placeholder="`${searchBrand(editCard.cardNumber) ?? '不明なブランド'}の○○カード`"
-        :label="`${searchBrand(editCard.cardNumber) ? `${searchBrand(editCard.cardNumber)}の○○カード` : 'カード名'}`"
+        :placeholder="`${brand}の○○カード`"
+        :label="`${brand !== '不明なブランド' ? `${brand}の○○カード` : 'カード名'}`"
         clearable
         ref="cardName"
         required
@@ -25,20 +25,20 @@ v-card(
         )
       v-text-field(
         v-model="editCard.cardNumber"
-        placeholder="0123456789012345"
+        v-maska="'#### #### #### ####'"
+        placeholder="0123 4567 8901 2345"
         label="カード番号（16桁）"
         autocomplete="cc-number"
+        inputmode="numeric"
         clearable
         ref="cardNumber"
         required
         prepend-inner-icon="mdi-credit-card"
         @keydown.enter="$refs.deadlineMM.focus()"
-        type="number"
-        :rules="[v => /[0-9]/.test(v) && v.length <= 16 || '数字のみ16桁まで']"
-        hide-spin-buttons
-        :min="14"
-        maxlength="16"
-        :counter="16"
+        type="text"
+        @input="onCardNumberInput"
+        :rules="[() => /^[0-9\s]*$/.test(cardNumberWithoutSpaces) && (cardNumberWithoutSpaces.length >= 14 && cardNumberWithoutSpaces.length <= 16 || cardNumberWithoutSpaces.length === 0) || '数字のみ14〜16桁']"
+        maxlength="19"
         )
       v-text-field(
         v-model="brand"
@@ -59,6 +59,7 @@ v-card(
           ref="deadlineMM"
           required
           @keydown.enter="$refs.deadlineYYYY.focus()"
+          @input="onDeadlineMMInput"
           type="number"
           :rules="[v => /[0-9]/.test(v) && v.length <= 2 || '数字のみ2桁まで']"
           hide-spin-buttons
@@ -72,6 +73,7 @@ v-card(
           ref="deadlineYYYY"
           required
           @keydown.enter="$refs.cardCVC.focus()"
+          @input="onDeadlineYYYYInput"
           type="number"
           :rules="[v => /[0-9]/.test(v) && v.length <= 4 || '数字のみ4桁まで']"
           hide-spin-buttons
@@ -86,6 +88,7 @@ v-card(
         required
         prepend-inner-icon="mdi-form-textbox-password"
         @keydown.enter="$refs.ownName.focus()"
+        @input="onCVCInput"
         type="number"
           :rules="[v => /[0-9]/.test(v) && v.length <= 4 || '数字のみ4桁まで']"
         hide-spin-buttons
@@ -164,9 +167,13 @@ v-card(
       }
     },
     computed: {
+      /** スペースを除いたカード番号 */
+      cardNumberWithoutSpaces () {
+        return this.editCard.cardNumber?.replace(/\s/g, '') ?? ''
+      },
       /** クレカのブランド名 */
       brand () {
-        return this.searchBrand(this.editCard.cardNumber) ?? '不明なブランド'
+        return this.searchBrand(this.cardNumberWithoutSpaces) ?? '不明なブランド'
       },
     },
     async mounted () {
@@ -193,10 +200,34 @@ v-card(
       async openURL (url: string) {
         await Browser.open({ url: url })
       },
-      addCardList (card: Card) {
+      /** カード番号入力時に16桁になったら次のフィールドに移動 */
+      onCardNumberInput () {
+        if (this.cardNumberWithoutSpaces?.length === 16) {
+          (this.$refs.deadlineMM as any).focus()
+        }
+      },
+      /** 有効期限MM入力時に2桁になったら次のフィールドに移動 */
+      onDeadlineMMInput () {
+        if (this.editCard.deadlineMM?.length === 2) {
+          (this.$refs.deadlineYYYY as any).focus()
+        }
+      },
+      /** 有効期限YYYY入力時に4桁になったら次のフィールドに移動 */
+      onDeadlineYYYYInput () {
+        if (this.editCard.deadlineYYYY?.length === 4) {
+          (this.$refs.cardCVC as any).focus()
+        }
+      },
+      /** CVC入力時に3桁になったら次のフィールドに移動 */
+      onCVCInput () {
+        if (this.editCard.cvc?.length === 3) {
+          (this.$refs.ownName as any).focus()
+        }
+      },
+      async addCardList (card: Card) {
         if (
-          this.editCard.cardNumber.length >= 14
-          && this.editCard.cardNumber.length <= 16
+          this.cardNumberWithoutSpaces.length >= 14
+          && this.cardNumberWithoutSpaces.length <= 16
           && this.editCard.deadlineYYYY.length >= 2
           && this.editCard.deadlineYYYY.length <= 4
           && this.editCard.deadlineMM.length > 0
@@ -208,7 +239,18 @@ v-card(
           if (this.editCard.name.length === 0) {
             this.editCard.name = `${this.brand}のクレジットカード`
           }
-          this.cards.cards.push(card)
+          // なぜかこうしないとcardNumberにスペースが入る
+          this.cards.cards.push({
+            name: this.editCard.name,
+            cardNumber: this.cardNumberWithoutSpaces,
+            deadlineYYYY: this.editCard.deadlineYYYY,
+            deadlineMM: this.editCard.deadlineMM,
+            cvc: this.editCard.cvc,
+            ownName: this.editCard.ownName,
+            memo: this.editCard.memo,
+            color: this.editCard.color,
+          })
+          console.log(this.cards.cards.at(-1))
           Toast.show({ text: 'カード情報を保存しました' })
           this.$router.push('/')
         } else {

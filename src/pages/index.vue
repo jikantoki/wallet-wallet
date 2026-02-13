@@ -244,10 +244,14 @@ v-card(
             .icon-and-text
               v-icon mdi-cog
               v-list-item-title 設定
+          v-list-item.item( @click="jumpToImport" )
+            .icon-and-text
+              v-icon mdi-import
+              v-list-item-title インポート
           v-list-item.item( @click="jumpToExport" )
             .icon-and-text
-              v-icon mdi-file-import
-              v-list-item-title インポート・エクスポート
+              v-icon mdi-export
+              v-list-item-title エクスポート
           v-list-item.item( @click="$router.push('/terms')" )
             .icon-and-text
               v-icon mdi-file-document-outline
@@ -282,7 +286,7 @@ v-card(
           template(v-slot:append-inner)
             v-icon(@click.stop="copy(card.name)") mdi-content-copy
         v-text-field(
-          v-model="card.cardNumber"
+          v-model="detailDialogTargetFormattedCardNumber"
           label="カード番号（16桁）"
           prepend-inner-icon="mdi-credit-card"
           readonly
@@ -634,6 +638,18 @@ v-card(
       }
     },
     computed: {
+      /** フォーマットされたカード番号（4桁区切り） */
+      detailDialogTargetFormattedCardNumber () {
+        if (this.detailDialogTarget === null) {
+          return null
+        }
+        const cardNumber = this.cards.cards[this.detailDialogTarget]?.cardNumber
+        if (cardNumber == undefined) {
+          return null
+        }
+        // 4桁ごとにスペースを挿入
+        return cardNumber.replace(/(\d{4})(?=\d)/g, '$1 ')
+      },
       detailDialogTargetBrand () {
         if (this.detailDialogTarget === null
         ) {
@@ -922,10 +938,26 @@ v-card(
           return false
         }
       },
+      /**
+       * エクスポート画面へ移動
+       */
       async jumpToExport () {
         const authResult = await this.auth()
         if (authResult) {
-          this.$router.push('/export')
+          this.$router.push('/data-export')
+          return true
+        } else {
+          Toast.show({ text: '生体認証に失敗しました' })
+          return false
+        }
+      },
+      /**
+       * インポート画面へ移動
+       */
+      async jumpToImport () {
+        const authResult = await this.auth()
+        if (authResult) {
+          this.$router.push('/data-import')
           return true
         } else {
           Toast.show({ text: '生体認証に失敗しました' })

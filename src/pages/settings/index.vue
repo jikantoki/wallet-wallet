@@ -33,6 +33,24 @@ v-card(
           p.description メール、プッシュ通知
       .setting-item(
         v-ripple
+        @click="openExport()"
+        )
+        .icon
+          v-icon mdi-export
+        .text
+          p.title データエクスポート
+          p.description JSON形式または暗号化形式で出力
+      .setting-item(
+        v-ripple
+        @click="openImport()"
+        )
+        .icon
+          v-icon mdi-import
+        .text
+          p.title データインポート
+          p.description JSON形式または暗号化形式から読み込み
+      .setting-item(
+        v-ripple
         @click="$router.push('/terms')"
         )
         .icon
@@ -104,7 +122,9 @@ v-dialog(
 </template>
 
 <script lang="ts">
+  import { AndroidBiometryStrength, BiometricAuth, BiometryError, BiometryErrorType } from '@aparajita/capacitor-biometric-auth'
   import { Browser } from '@capacitor/browser'
+  import { Toast } from '@capacitor/toast'
   import { AndroidSettings, IOSSettings, NativeSettings } from 'capacitor-native-settings'
   import { useMyProfileStore } from '@/stores/myProfile'
   import { useSettingsStore } from '@/stores/settings'
@@ -137,6 +157,58 @@ v-dialog(
       /** URLをブラウザで開く */
       async openURL (url: string) {
         await Browser.open({ url: url })
+      },
+      /**
+       * ## 生体認証
+       * await必須
+       * @returns boolean 認証OK→true、NG→false
+       */
+      async auth (): Promise <boolean> {
+        const isAvailable = await BiometricAuth.checkBiometry()
+        if (isAvailable.isAvailable == false) {
+          // 認証がそもそも機能しない場合は、仕方ないので承認する
+          return true
+        }
+        try {
+          await BiometricAuth.authenticate({
+            reason: '認証してください',
+            cancelTitle: 'キャンセル',
+            allowDeviceCredential: true,
+            androidTitle: '生体認証ログイン',
+            androidSubtitle: '本人確認をしてください',
+            androidConfirmationRequired: true,
+            androidBiometryStrength: AndroidBiometryStrength.weak,
+          })
+          return true
+        } catch (error) {
+          if (error instanceof BiometryError && error.code !== BiometryErrorType.userCancel) {
+            // エラーを表示
+            Toast.show({ text: error.message })
+          } else {
+            console.log(error)
+          }
+          return false
+        }
+      },
+      async openExport () {
+        const authResult = await this.auth()
+        if (authResult) {
+          this.$router.push('/data-export')
+          return true
+        } else {
+          Toast.show({ text: '生体認証に失敗しました' })
+          return false
+        }
+      },
+      async openImport () {
+        const authResult = await this.auth()
+        if (authResult) {
+          this.$router.push('/data-import')
+          return true
+        } else {
+          Toast.show({ text: '生体認証に失敗しました' })
+          return false
+        }
       },
     },
   }
