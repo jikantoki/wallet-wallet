@@ -234,10 +234,10 @@ v-card(
         const link = document.createElement('a')
         link.href = url
         link.download = filename
-        document.body.append(link)
+        document.body.appendChild(link)
         link.click()
         setTimeout(() => {
-          link.remove()
+          document.body.removeChild(link)
           URL.revokeObjectURL(url)
         }, 100)
       },
