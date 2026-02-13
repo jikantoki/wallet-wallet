@@ -404,7 +404,6 @@ v-dialog(
             console.error('ファイル保存に失敗しました:', error)
             await Toast.show({
               text: 'ファイル保存に失敗しました',
-
               duration: 'short',
             })
           }
