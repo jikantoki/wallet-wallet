@@ -15,7 +15,7 @@ v-card(
     .content
       h2 ファイルでデータを転送
       p.my-4 カードと銀行口座のデータを暗号化ファイルとして他の端末に転送できます。パスワードで保護されます。
-      
+
       v-text-field(
         v-model="password"
         label="転送用パスワード"
@@ -26,7 +26,7 @@ v-card(
         prepend-icon="mdi-lock"
         @input="onPasswordChange"
       )
-      
+
       v-text-field.mt-4(
         v-model="passwordConfirm"
         label="パスワード確認"
@@ -35,7 +35,7 @@ v-card(
         prepend-icon="mdi-lock-check"
         @input="onPasswordChange"
       )
-      
+
       v-btn.mt-4(
         @click="exportToFile"
         prepend-icon="mdi-export"
@@ -44,30 +44,30 @@ v-card(
         :loading="exporting"
         block
       ) ファイルをエクスポート
-      
+
       .info-box.mt-8(v-if="exported")
         v-icon.mb-2(color="success" size="48") mdi-check-circle
         h3 エクスポート成功
-        p.mt-2 ファイルが保存されました
+        p.mt-2 ファイルがエクスポートされました
         p
-          strong ファイル名: 
+          strong ファイル名:
           | {{ fileName }}
-        
+
         .actions.mt-4
           v-btn.mb-2(
-            @click="shareFile"
-            prepend-icon="mdi-share-variant"
+            @click="downloadFile"
+            prepend-icon="mdi-download"
             style="background-color: rgb(var(--v-theme-primary)); color: white;"
             block
-          ) ファイルを共有
-          
+          ) ファイルをダウンロード
+
           v-btn(
             @click="copyToClipboard"
             prepend-icon="mdi-content-copy"
             variant="outlined"
             block
           ) クリップボードにコピー
-        
+
         .warning.mt-4.pa-4(
           style="background-color: rgba(var(--v-theme-warning), 0.1); border-radius: 8px;"
         )
@@ -75,7 +75,7 @@ v-card(
           p.mt-2
             strong 重要：
             | ファイルには暗号化されたデータが含まれています。パスワードを忘れないようにしてください。
-      
+
       .my-16
 
 v-dialog(
@@ -96,9 +96,9 @@ v-dialog(
 </template>
 
 <script lang="ts">
-  import { Filesystem, Directory } from '@capacitor/filesystem'
-  import { Share } from '@capacitor/share'
   import { Clipboard } from '@capacitor/clipboard'
+  import { Directory, Filesystem } from '@capacitor/filesystem'
+  import { Share } from '@capacitor/share'
   import { Toast } from '@capacitor/toast'
   import { encryptData } from '@/js/transferEncryption'
   import { useCardsStore } from '@/stores/cards'
@@ -150,11 +150,11 @@ v-dialog(
 
           // データを暗号化
           const encryptedData = encryptData(exportData, this.password)
-          
+
           // ファイル名を生成（タイムスタンプ付き）
           const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
           this.fileName = `wallet-backup-${timestamp}.wlt`
-          
+
           // ファイルに保存
           const result = await Filesystem.writeFile({
             path: this.fileName,
@@ -162,7 +162,7 @@ v-dialog(
             directory: Directory.Cache,
             recursive: true,
           })
-          
+
           this.fileUri = result.uri
           this.encryptedContent = encryptedData
           this.exported = true
@@ -180,27 +180,24 @@ v-dialog(
           this.exported = false
         }
       },
-      
-      async shareFile () {
-        try {
-          await Share.share({
-            title: 'Wallet Wallet バックアップ',
-            text: `Wallet Walletのバックアップファイルです。パスワードが必要です。`,
-            url: this.fileUri,
-            dialogTitle: 'バックアップを共有',
-          })
-        } catch (error) {
-          console.error('ファイル共有に失敗しました:', error)
-          // ユーザーがキャンセルした場合もエラーになるので、エラーダイアログは表示しない
-        }
+
+      async downloadFile () {
+        // 一旦Blobに変換
+        const blob = new Blob([this.encryptedContent], { type: 'application/octet-stream' })
+        const fileUrl = URL.createObjectURL(blob)
+        // aタグを作成してクリックイベントを発火
+        const a = document.createElement('a')
+        a.href = fileUrl
+        a.download = this.fileName
+        a.click()
       },
-      
+
       async copyToClipboard () {
         try {
           await Clipboard.write({
             string: this.encryptedContent,
           })
-          
+
           await Toast.show({
             text: 'クリップボードにコピーしました',
             duration: 'short',

@@ -15,7 +15,7 @@ v-card(
     .content
       h2 ファイルからデータをインポート
       p.my-4 転送元の端末で生成したファイルを選択して、データをインポートします。
-      
+
       v-alert.my-4(
         type="warning"
         variant="tonal"
@@ -23,10 +23,10 @@ v-card(
         | 既存のカードと銀行口座データは
         strong 上書き
         | されます。事前にバックアップを取ることをお勧めします。
-      
+
       .import-method.my-4
         h3.mb-4 インポート方法を選択
-        
+
         v-btn.mb-3(
           @click="selectFile"
           prepend-icon="mdi-file-upload"
@@ -34,7 +34,7 @@ v-card(
           :disabled="importing"
           block
         ) ファイルを選択
-        
+
         v-btn(
           @click="pasteFromClipboard"
           prepend-icon="mdi-content-paste"
@@ -42,14 +42,14 @@ v-card(
           :disabled="importing"
           block
         ) クリップボードから貼り付け
-      
+
       .file-info.my-4(v-if="fileLoaded")
         v-icon.mb-2(color="success" size="48") mdi-file-check
         h3 ファイルを読み込みました
         p.mt-2(v-if="fileName")
-          strong ファイル名: 
+          strong ファイル名:
           | {{ fileName }}
-        
+
         v-text-field.mt-4(
           v-model="password"
           label="転送用パスワード"
@@ -60,7 +60,7 @@ v-card(
           prepend-icon="mdi-lock"
           :disabled="importing"
         )
-        
+
         v-btn.mt-4(
           @click="importData"
           prepend-icon="mdi-database-import"
@@ -69,7 +69,7 @@ v-card(
           :loading="importing"
           block
         ) データをインポート
-        
+
         v-btn.mt-2(
           @click="resetImport"
           prepend-icon="mdi-refresh"
@@ -77,7 +77,7 @@ v-card(
           :disabled="importing"
           block
         ) リセット
-      
+
       .my-16
 
 v-dialog(
@@ -120,12 +120,11 @@ v-dialog(
 </template>
 
 <script lang="ts">
-  import { Filesystem, Directory } from '@capacitor/filesystem'
   import { Clipboard } from '@capacitor/clipboard'
   import { Toast } from '@capacitor/toast'
+  import { decryptData } from '@/js/transferEncryption'
   import { useCardsStore } from '@/stores/cards'
   import { useSettingsStore } from '@/stores/settings'
-  import { decryptData } from '@/js/transferEncryption'
 
   export default {
     data () {
@@ -147,30 +146,27 @@ v-dialog(
       async selectFile () {
         try {
           // ファイルピッカーを使用してファイルを選択
-          // Capacitorのファイルピッカーはプラグインが必要なので、
-          // 代わりにinput[type=file]を使用
+          // Capacitorのファイルピッカーを使いたいのでインポートして使いたいが、
+          // 現時点では公式プラグインがないため、代替手段としてHTMLのinput要素を使用
           const input = document.createElement('input')
           input.type = 'file'
           input.accept = '.wlt,.txt'
-          
-          input.onchange = async (e: any) => {
+
+          input.addEventListener('change', async (e: any) => {
             const file = e.target.files[0]
             if (!file) return
-            
+
             this.fileName = file.name
-            
-            const reader = new FileReader()
-            reader.onload = (e: any) => {
-              this.encryptedData = e.target.result
+
+            try {
+              this.encryptedData = await file.text()
               this.fileLoaded = true
-            }
-            reader.onerror = () => {
+            } catch {
               this.errorMessage = 'ファイルの読み込みに失敗しました'
               this.importErrorDialog = true
             }
-            reader.readAsText(file)
-          }
-          
+          })
+
           input.click()
         } catch (error) {
           console.error('ファイル選択に失敗しました:', error)
@@ -178,16 +174,16 @@ v-dialog(
           this.importErrorDialog = true
         }
       },
-      
+
       async pasteFromClipboard () {
         try {
           const result = await Clipboard.read()
-          
+
           if (result.value) {
             this.encryptedData = result.value
             this.fileName = 'クリップボードから'
             this.fileLoaded = true
-            
+
             await Toast.show({
               text: 'クリップボードから読み込みました',
               duration: 'short',
@@ -202,7 +198,7 @@ v-dialog(
           this.importErrorDialog = true
         }
       },
-      
+
       async importData () {
         if (!this.password || !this.encryptedData) {
           return
@@ -278,14 +274,14 @@ v-dialog(
           this.importing = false
         }
       },
-      
+
       resetImport () {
         this.fileLoaded = false
         this.password = ''
         this.encryptedData = ''
         this.fileName = ''
       },
-      
+
       closeAndGoHome () {
         this.importSuccessDialog = false
         this.$router.push('/')
