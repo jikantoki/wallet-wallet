@@ -377,7 +377,6 @@ v-dialog(
               path: filename,
               data: content,
               directory: Directory.Cache,
-              recursive: true,
             })
 
             await Share.share({
@@ -410,7 +409,7 @@ v-dialog(
           window.setTimeout(() => {
             link.remove()
             URL.revokeObjectURL(url)
-          }, 100)
+          }, 300)
         }
       },
 
@@ -501,7 +500,7 @@ v-dialog(
           a.click()
           window.setTimeout(() => {
             URL.revokeObjectURL(fileUrl)
-          }, 100)
+          }, 300)
         }
       },
 
