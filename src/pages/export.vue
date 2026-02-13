@@ -158,6 +158,14 @@ v-card(
       this.cardJSON = JSON.stringify(this.cards.cards, null, 2)
       this.bankJSON = JSON.stringify(this.cards.bank, null, 2)
     },
+    beforeUnmount () {
+      if (this.cardValidationTimeout) {
+        clearTimeout(this.cardValidationTimeout)
+      }
+      if (this.bankValidationTimeout) {
+        clearTimeout(this.bankValidationTimeout)
+      }
+    },
     methods: {
       /** URLをブラウザで開く */
       async openURL (url: string) {
@@ -228,8 +236,10 @@ v-card(
         link.download = filename
         document.body.append(link)
         link.click()
-        link.remove()
-        URL.revokeObjectURL(url)
+        setTimeout(() => {
+          link.remove()
+          URL.revokeObjectURL(url)
+        }, 100)
       },
     },
   }
