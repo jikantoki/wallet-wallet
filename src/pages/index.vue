@@ -937,7 +937,7 @@ v-card(
       async jumpToExport () {
         const authResult = await this.auth()
         if (authResult) {
-          this.$router.push('/export')
+          this.$router.push('/data-export')
           return true
         } else {
           Toast.show({ text: '生体認証に失敗しました' })

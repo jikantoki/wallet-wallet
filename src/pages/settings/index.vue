@@ -38,17 +38,17 @@ v-card(
         .icon
           v-icon mdi-export
         .text
-          p.title データ転送（エクスポート）
-          p.description ファイル+パスワードで他端末へ転送
+          p.title データエクスポート
+          p.description JSON形式または暗号化形式で出力
       .setting-item(
         v-ripple
-        @click="$router.push('/transfer-import')"
+        @click="openImport()"
         )
         .icon
           v-icon mdi-import
         .text
-          p.title データ転送（インポート）
-          p.description ファイルからデータを受け取る
+          p.title データインポート
+          p.description JSON形式または暗号化形式から読み込み
       .setting-item(
         v-ripple
         @click="$router.push('/terms')"
@@ -193,7 +193,17 @@ v-dialog(
       async openExport () {
         const authResult = await this.auth()
         if (authResult) {
-          this.$router.push('/transfer-export')
+          this.$router.push('/data-export')
+          return true
+        } else {
+          Toast.show({ text: '生体認証に失敗しました' })
+          return false
+        }
+      },
+      async openImport () {
+        const authResult = await this.auth()
+        if (authResult) {
+          this.$router.push('/data-import')
           return true
         } else {
           Toast.show({ text: '生体認証に失敗しました' })

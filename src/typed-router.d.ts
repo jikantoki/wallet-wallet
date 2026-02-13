@@ -23,6 +23,8 @@ declare module 'vue-router/auto-routes' {
     '/about': RouteRecordInfo<'/about', '/about', Record<never, never>, Record<never, never>>,
     '/create': RouteRecordInfo<'/create', '/create', Record<never, never>, Record<never, never>>,
     '/createBank': RouteRecordInfo<'/createBank', '/createBank', Record<never, never>, Record<never, never>>,
+    '/data-export': RouteRecordInfo<'/data-export', '/data-export', Record<never, never>, Record<never, never>>,
+    '/data-import': RouteRecordInfo<'/data-import', '/data-import', Record<never, never>, Record<never, never>>,
     '/export': RouteRecordInfo<'/export', '/export', Record<never, never>, Record<never, never>>,
     '/friendlist': RouteRecordInfo<'/friendlist', '/friendlist', Record<never, never>, Record<never, never>>,
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
@@ -69,6 +71,14 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/createBank.vue': {
       routes: '/createBank'
+      views: never
+    }
+    'src/pages/data-export.vue': {
+      routes: '/data-export'
+      views: never
+    }
+    'src/pages/data-import.vue': {
+      routes: '/data-import'
       views: never
     }
     'src/pages/export.vue': {
