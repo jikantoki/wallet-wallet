@@ -499,7 +499,9 @@ v-dialog(
           a.href = fileUrl
           a.download = this.fileName
           a.click()
-          URL.revokeObjectURL(fileUrl)
+          window.setTimeout(() => {
+            URL.revokeObjectURL(fileUrl)
+          }, 100)
         }
       },
 
