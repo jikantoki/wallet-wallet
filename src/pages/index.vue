@@ -282,7 +282,7 @@ v-card(
           template(v-slot:append-inner)
             v-icon(@click.stop="copy(card.name)") mdi-content-copy
         v-text-field(
-          v-model="card.cardNumber"
+          v-model="detailDialogTargetFormattedCardNumber"
           label="カード番号（16桁）"
           prepend-inner-icon="mdi-credit-card"
           readonly
@@ -634,6 +634,18 @@ v-card(
       }
     },
     computed: {
+      /** フォーマットされたカード番号（4桁区切り） */
+      detailDialogTargetFormattedCardNumber () {
+        if (this.detailDialogTarget === null) {
+          return null
+        }
+        const cardNumber = this.cards.cards[this.detailDialogTarget]?.cardNumber
+        if (cardNumber == undefined) {
+          return null
+        }
+        // 4桁ごとにスペースを挿入
+        return cardNumber.replace(/(\d{4})(?=\d)/g, '$1 ')
+      },
       detailDialogTargetBrand () {
         if (this.detailDialogTarget === null
         ) {

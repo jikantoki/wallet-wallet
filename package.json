@@ -32,6 +32,7 @@
     "@mdi/font": "7.4.47",
     "@types/qrcode": "^1.5.6",
     "capacitor-native-settings": "^8.0.0",
+    "maska": "^3.2.0",
     "pinia": "^3.0.4",
     "pinia-plugin-persistedstate": "^4.7.1",
     "pug": "^3.0.3",

@@ -15,8 +15,8 @@ v-card(
     .card-form
       v-text-field(
         v-model="editCard.name"
-        :placeholder="`${searchBrand(editCard.cardNumber) ?? '不明なブランド'}の○○カード`"
-        :label="`${searchBrand(editCard.cardNumber) ? `${searchBrand(editCard.cardNumber)}の○○カード` : 'カード名'}`"
+        :placeholder="`${brand}の○○カード`"
+        :label="`${brand !== '不明なブランド' ? `${brand}の○○カード` : 'カード名'}`"
         clearable
         ref="cardName"
         required
@@ -25,21 +25,20 @@ v-card(
         )
       v-text-field(
         v-model="editCard.cardNumber"
-        placeholder="0123456789012345"
+        v-maska="'#### #### #### ####'"
+        placeholder="0123 4567 8901 2345"
         label="カード番号（16桁）"
         autocomplete="cc-number"
+        inputmode="numeric"
         clearable
         ref="cardNumber"
         required
         prepend-inner-icon="mdi-credit-card"
         @keydown.enter="$refs.deadlineMM.focus()"
-        @input="onCardNumberInput"
-        type="number"
-        :rules="[v => /[0-9]/.test(v) && v.length <= 16 || '数字のみ16桁まで']"
-        hide-spin-buttons
-        :min="14"
-        maxlength="16"
-        :counter="16"
+        type="text"
+        :rules="[v => /^[0-9\s]*$/.test(v) && (v.replace(/\s/g, '').length >= 14 && v.replace(/\s/g, '').length <= 16 || v.replace(/\s/g, '').length === 0) || '数字のみ14〜16桁']"
+        maxlength="19"
+        :counter="19"
         )
       v-text-field(
         v-model="brand"
@@ -168,9 +167,13 @@ v-card(
       }
     },
     computed: {
+      /** スペースを除いたカード番号 */
+      cardNumberWithoutSpaces () {
+        return this.editCard.cardNumber?.replace(/\s/g, '') ?? ''
+      },
       /** クレカのブランド名 */
       brand () {
-        return this.searchBrand(this.editCard.cardNumber) ?? '不明なブランド'
+        return this.searchBrand(this.cardNumberWithoutSpaces) ?? '不明なブランド'
       },
     },
     async mounted () {
@@ -223,8 +226,8 @@ v-card(
       },
       addCardList (card: Card) {
         if (
-          this.editCard.cardNumber.length >= 14
-          && this.editCard.cardNumber.length <= 16
+          this.cardNumberWithoutSpaces.length >= 14
+          && this.cardNumberWithoutSpaces.length <= 16
           && this.editCard.deadlineYYYY.length >= 2
           && this.editCard.deadlineYYYY.length <= 4
           && this.editCard.deadlineMM.length > 0
