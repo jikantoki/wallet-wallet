@@ -300,8 +300,15 @@ v-dialog(
         this.cardValidationTimeout = window.setTimeout(() => {
           try {
             JSON.parse(this.cardJSON)
+            if (this.cardJSON.includes('bankName')) {
+              throw new Error('クレジットカード設定に銀行口座データが含まれています')
+            }
             this.cardJSONError = ''
           } catch (error) {
+            if (error instanceof Error && error.message === 'クレジットカード設定に銀行口座データが含まれています') {
+              this.cardJSONError = error.message
+              return
+            }
             this.cardJSONError = error instanceof Error ? `JSONパースエラー: ${error.message}` : 'JSONパースエラーが発生しました'
           }
         }, 10)
@@ -314,8 +321,15 @@ v-dialog(
         this.bankValidationTimeout = window.setTimeout(() => {
           try {
             JSON.parse(this.bankJSON)
+            if (this.bankJSON.includes('deadlineYYYY')) {
+              throw new Error('銀行口座設定にクレジットカードデータが含まれています')
+            }
             this.bankJSONError = ''
           } catch (error) {
+            if (error instanceof Error && error.message === '銀行口座設定にクレジットカードデータが含まれています') {
+              this.bankJSONError = error.message
+              return
+            }
             this.bankJSONError = error instanceof Error ? `JSONパースエラー: ${error.message}` : 'JSONパースエラーが発生しました'
           }
         }, 10)
@@ -389,9 +403,12 @@ v-dialog(
       /** JSONインポートの適用 */
       async applyJSONImport () {
         try {
+          if (this.cardJSONError || this.bankJSONError) {
+            throw new Error('JSONデータにエラーがあります')
+          }
           const cardData = JSON.parse(this.cardJSON)
           const bankData = JSON.parse(this.bankJSON)
-          
+
           this.cards.cards = cardData
           this.cards.bank = bankData
 
@@ -405,7 +422,7 @@ v-dialog(
             text: 'データをインポートしました',
             duration: 'short',
           })
-        } catch (error) {
+        } catch {
           this.errorMessage = 'データのインポートに失敗しました'
           this.importErrorDialog = true
         }

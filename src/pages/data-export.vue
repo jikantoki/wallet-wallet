@@ -58,14 +58,14 @@ v-card(
             v-icon.mr-2 mdi-credit-card
             span クレジットカード設定ファイル
           v-card-text.pt-4
-            v-textarea(
+            //v-textarea(
               v-model="cardJSON"
               variant="outlined"
               no-resize
               rows="8"
               @input="validateCardJSON"
               :error="!!cardJSONError"
-            )
+              )
             v-alert.mb-4(
               v-if="cardJSONError"
               type="error"
@@ -97,14 +97,14 @@ v-card(
             v-icon.mr-2 mdi-bank
             span 銀行口座設定ファイル
           v-card-text.pt-4
-            v-textarea(
+            //v-textarea(
               v-model="bankJSON"
               variant="outlined"
               no-resize
               rows="8"
               @input="validateBankJSON"
               :error="!!bankJSONError"
-            )
+              )
             v-alert.mb-4(
               v-if="bankJSONError"
               type="error"
