@@ -60,6 +60,7 @@ v-card(
             color="success"
             variant="elevated"
             @click="downloadCardJSON"
+            :disabled="!!cardJSONError"
           ) ダウンロード
 
     //-- 銀行口座設定 --
@@ -98,6 +99,7 @@ v-card(
             color="success"
             variant="elevated"
             @click="downloadBankJSON"
+            :disabled="!!bankJSONError"
           ) ダウンロード
     .my-16.pa-4
   //-- 個人情報警告ダイアログ --
