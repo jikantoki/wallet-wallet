@@ -390,14 +390,21 @@ v-dialog(
               dialogTitle: 'ファイルの保存先を選択',
             })
 
-            await Toast.show({
-              text: 'ファイルを保存しました',
-              duration: 'short',
-            })
+            // 共有後、キャッシュファイルを削除
+            try {
+              await Filesystem.deleteFile({
+                path: filename,
+                directory: Directory.Cache,
+              })
+            } catch (cleanupError) {
+              // クリーンアップエラーは無視（次回起動時にOSが削除する可能性がある）
+              console.warn('キャッシュファイルの削除に失敗しました:', cleanupError)
+            }
           } catch (error) {
             console.error('ファイル保存に失敗しました:', error)
             await Toast.show({
               text: 'ファイル保存に失敗しました',
+
               duration: 'short',
             })
           }
@@ -485,10 +492,16 @@ v-dialog(
               dialogTitle: 'ファイルの保存先を選択',
             })
 
-            await Toast.show({
-              text: 'ファイルを保存しました',
-              duration: 'short',
-            })
+            // 共有後、キャッシュファイルを削除
+            try {
+              await Filesystem.deleteFile({
+                path: this.fileName,
+                directory: Directory.Cache,
+              })
+            } catch (cleanupError) {
+              // クリーンアップエラーは無視（次回起動時にOSが削除する可能性がある）
+              console.warn('キャッシュファイルの削除に失敗しました:', cleanupError)
+            }
           } catch (error) {
             console.error('ファイル共有に失敗しました:', error)
             this.errorMessage = 'ファイルの保存に失敗しました'
