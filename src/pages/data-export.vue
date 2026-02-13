@@ -84,12 +84,12 @@ v-card(
                 @click="copy(cardJSON)"
               ) コピー
               v-btn(
-                prepend-icon="mdi-download"
+                prepend-icon="mdi-content-save"
                 color="success"
                 variant="elevated"
                 @click="downloadCardJSON"
                 :disabled="!!cardJSONError"
-              ) ダウンロード
+              ) ファイルを保存
 
         //-- 銀行口座設定 --
         v-card.mb-4(variant="outlined")
@@ -123,12 +123,12 @@ v-card(
                 @click="copy(bankJSON)"
               ) コピー
               v-btn(
-                prepend-icon="mdi-download"
+                prepend-icon="mdi-content-save"
                 color="success"
                 variant="elevated"
                 @click="downloadBankJSON"
                 :disabled="!!bankJSONError"
-              ) ダウンロード
+              ) ファイルを保存
 
       //-- 暗号化形式のエクスポート --
       .encrypted-export(v-if="exportType === 'encrypted'")
@@ -175,10 +175,10 @@ v-card(
           .actions.mt-4
             v-btn.mb-2(
               @click="downloadFile"
-              prepend-icon="mdi-download"
+              prepend-icon="mdi-content-save"
               style="background-color: rgb(var(--v-theme-primary)); color: white;"
               block
-            ) ファイルをダウンロード
+            ) ファイルを保存
 
             v-btn(
               @click="copyToClipboard"
@@ -229,7 +229,7 @@ v-dialog(
         @click="confirmDownload"
         color="error"
         variant="elevated"
-      ) 理解した上でダウンロード
+      ) 理解した上で保存
 
 //-- エラーダイアログ（暗号化形式用） --
 v-dialog(
@@ -252,7 +252,9 @@ v-dialog(
 <script lang="ts">
   import { Browser } from '@capacitor/browser'
   import { Clipboard } from '@capacitor/clipboard'
+  import { Capacitor } from '@capacitor/core'
   import { Directory, Filesystem } from '@capacitor/filesystem'
+  import { Share } from '@capacitor/share'
   import { Toast } from '@capacitor/toast'
   import { encryptData } from '@/js/transferEncryption'
   import { useCardsStore } from '@/stores/cards'
@@ -365,18 +367,51 @@ v-dialog(
         this.downloadTarget = ''
       },
       /** JSONファイルのダウンロード */
-      downloadJSON (content: string, filename: string) {
-        const blob = new Blob([content], { type: 'application/json' })
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = filename
-        document.body.append(link)
-        link.click()
-        window.setTimeout(() => {
-          link.remove()
-          URL.revokeObjectURL(url)
-        }, 100)
+      async downloadJSON (content: string, filename: string) {
+        const platform = Capacitor.getPlatform()
+
+        if (platform === 'android') {
+          // Androidの場合: Filesystemプラグインでファイルを保存してからShareで共有
+          try {
+            const result = await Filesystem.writeFile({
+              path: filename,
+              data: content,
+              directory: Directory.Cache,
+              recursive: true,
+            })
+
+            await Share.share({
+              title: 'ファイルを保存',
+              text: filename,
+              url: result.uri,
+              dialogTitle: 'ファイルの保存先を選択',
+            })
+
+            await Toast.show({
+              text: 'ファイルを保存しました',
+              duration: 'short',
+            })
+          } catch (error) {
+            console.error('ファイル保存に失敗しました:', error)
+            await Toast.show({
+              text: 'ファイル保存に失敗しました',
+              duration: 'short',
+            })
+          }
+        } else {
+          // Webの場合: 従来のblob/aタグ方式
+          const blob = new Blob([content], { type: 'application/json' })
+          const url = URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = filename
+          document.body.append(link)
+          link.click()
+          window.setTimeout(() => {
+            link.remove()
+            URL.revokeObjectURL(url)
+          }, 100)
+        }
       },
 
       // 暗号化形式用のメソッド
@@ -435,14 +470,37 @@ v-dialog(
       },
 
       async downloadFile () {
-        // 一旦Blobに変換
-        const blob = new Blob([this.encryptedContent], { type: 'application/octet-stream' })
-        const fileUrl = URL.createObjectURL(blob)
-        // aタグを作成してクリックイベントを発火
-        const a = document.createElement('a')
-        a.href = fileUrl
-        a.download = this.fileName
-        a.click()
+        const platform = Capacitor.getPlatform()
+
+        if (platform === 'android') {
+          // Androidの場合: Shareプラグインを使用
+          try {
+            await Share.share({
+              title: 'バックアップファイルを保存',
+              text: this.fileName,
+              url: this.fileUri,
+              dialogTitle: 'ファイルの保存先を選択',
+            })
+
+            await Toast.show({
+              text: 'ファイルを保存しました',
+              duration: 'short',
+            })
+          } catch (error) {
+            console.error('ファイル共有に失敗しました:', error)
+            this.errorMessage = 'ファイルの保存に失敗しました'
+            this.errorDialog = true
+          }
+        } else {
+          // Webの場合: 従来のblob/aタグ方式
+          const blob = new Blob([this.encryptedContent], { type: 'application/octet-stream' })
+          const fileUrl = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = fileUrl
+          a.download = this.fileName
+          a.click()
+          URL.revokeObjectURL(fileUrl)
+        }
       },
 
       async copyToClipboard () {
