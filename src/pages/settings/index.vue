@@ -33,6 +33,24 @@ v-card(
           p.description メール、プッシュ通知
       .setting-item(
         v-ripple
+        @click="$router.push('/transfer-export')"
+        )
+        .icon
+          v-icon mdi-export
+        .text
+          p.title データ転送（エクスポート）
+          p.description ファイル+パスワードで他端末へ転送
+      .setting-item(
+        v-ripple
+        @click="$router.push('/transfer-import')"
+        )
+        .icon
+          v-icon mdi-import
+        .text
+          p.title データ転送（インポート）
+          p.description ファイルからデータを受け取る
+      .setting-item(
+        v-ripple
         @click="$router.push('/terms')"
         )
         .icon
