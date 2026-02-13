@@ -25,7 +25,6 @@ declare module 'vue-router/auto-routes' {
     '/createBank': RouteRecordInfo<'/createBank', '/createBank', Record<never, never>, Record<never, never>>,
     '/data-export': RouteRecordInfo<'/data-export', '/data-export', Record<never, never>, Record<never, never>>,
     '/data-import': RouteRecordInfo<'/data-import', '/data-import', Record<never, never>, Record<never, never>>,
-    '/export': RouteRecordInfo<'/export', '/export', Record<never, never>, Record<never, never>>,
     '/friendlist': RouteRecordInfo<'/friendlist', '/friendlist', Record<never, never>, Record<never, never>>,
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
     '/password_reset': RouteRecordInfo<'/password_reset', '/password_reset', Record<never, never>, Record<never, never>>,
@@ -36,8 +35,6 @@ declare module 'vue-router/auto-routes' {
     '/settings/display': RouteRecordInfo<'/settings/display', '/settings/display', Record<never, never>, Record<never, never>>,
     '/settings/profile': RouteRecordInfo<'/settings/profile', '/settings/profile', Record<never, never>, Record<never, never>>,
     '/terms': RouteRecordInfo<'/terms', '/terms', Record<never, never>, Record<never, never>>,
-    '/transfer-export': RouteRecordInfo<'/transfer-export', '/transfer-export', Record<never, never>, Record<never, never>>,
-    '/transfer-import': RouteRecordInfo<'/transfer-import', '/transfer-import', Record<never, never>, Record<never, never>>,
     '/tutorial': RouteRecordInfo<'/tutorial', '/tutorial', Record<never, never>, Record<never, never>>,
     '/user/[userId]': RouteRecordInfo<'/user/[userId]', '/user/:userId', { userId: ParamValue<true> }, { userId: ParamValue<false> }>,
   }
@@ -81,10 +78,6 @@ declare module 'vue-router/auto-routes' {
       routes: '/data-import'
       views: never
     }
-    'src/pages/export.vue': {
-      routes: '/export'
-      views: never
-    }
     'src/pages/friendlist.vue': {
       routes: '/friendlist'
       views: never
@@ -123,14 +116,6 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/terms.vue': {
       routes: '/terms'
-      views: never
-    }
-    'src/pages/transfer-export.vue': {
-      routes: '/transfer-export'
-      views: never
-    }
-    'src/pages/transfer-import.vue': {
-      routes: '/transfer-import'
       views: never
     }
     'src/pages/tutorial.vue': {
