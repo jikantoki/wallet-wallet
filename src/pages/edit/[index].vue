@@ -264,8 +264,8 @@ v-card(
           if (this.editCard.name.length === 0) {
             this.editCard.name = `${this.brand}のクレジットカード`
           }
-          // Update the card at the specified index
-          this.cards.cards[this.cardIndex] = {
+          // Update the card at the specified index using splice for reactivity
+          this.cards.cards.splice(this.cardIndex, 1, {
             name: this.editCard.name,
             cardNumber: this.cardNumberWithoutSpaces,
             deadlineYYYY: this.editCard.deadlineYYYY,
@@ -274,7 +274,7 @@ v-card(
             ownName: this.editCard.ownName,
             memo: this.editCard.memo,
             color: this.editCard.color,
-          }
+          })
           Toast.show({ text: 'カード情報を更新しました' })
           this.$router.push('/')
         } else {

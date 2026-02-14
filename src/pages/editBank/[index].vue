@@ -222,7 +222,7 @@ v-card(
       'editCard.shopCode': {
         handler (shopCode: string) {
           for (const branch of this.bankBranches) {
-            if (branch.code != shopCode) {
+            if (branch.code !== shopCode) {
               continue
             }
             // 支店名を入力する
@@ -299,8 +299,8 @@ v-card(
           if (this.editCard.name.length === 0) {
             this.editCard.name = this.editCard.bankName
           }
-          // Update the bank at the specified index
-          this.cards.bank[this.bankIndex] = this.editCard
+          // Update the bank at the specified index using splice for reactivity
+          this.cards.bank.splice(this.bankIndex, 1, this.editCard)
           Toast.show({ text: '口座情報を更新しました' })
           this.$router.push('/')
         } else {
