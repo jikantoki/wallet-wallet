@@ -345,6 +345,11 @@ v-card(
             v-icon(@click.stop="copy(card.memo)") mdi-content-copy
       v-card-actions
         v-btn(
+          prepend-icon="mdi-pencil"
+          style="background-color: rgb(var(--v-theme-secondary)); color: white;"
+          @click="editCard(detailDialogTarget)"
+        ) 編集
+        v-btn(
           prepend-icon="mdi-trash-can"
           style="background-color: var(--color-error); color: white;"
           @click="deleteDialog = true"
@@ -439,6 +444,11 @@ v-card(
           template(v-slot:append-inner)
             v-icon(@click.stop="copy(card.memo)") mdi-content-copy
       v-card-actions
+        v-btn(
+          prepend-icon="mdi-pencil"
+          style="background-color: rgb(var(--v-theme-secondary)); color: white;"
+          @click="editBankAccount(detailBankDialogTarget)"
+        ) 編集
         v-btn(
           prepend-icon="mdi-trash-can"
           style="background-color: var(--color-error); color: white;"
@@ -915,6 +925,12 @@ v-card(
           }
           this.cards.cards.splice(this.detailDialogTarget, 1)
         }, 500)
+      },
+      editCard (index: number) {
+        this.$router.push(`/edit/${index}`)
+      },
+      editBankAccount (index: number) {
+        this.$router.push(`/editBank/${index}`)
       },
       async openBank (index: number) {
         const authResult = await this.auth()
