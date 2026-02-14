@@ -242,11 +242,11 @@ v-card(
         this.$router.push('/')
         return
       }
-      
-      this.bankIndex = parseInt(indexParam)
-      
+
+      this.bankIndex = Number.parseInt(indexParam)
+
       // Check if the index is valid
-      if (isNaN(this.bankIndex) || this.bankIndex < 0 || this.bankIndex >= this.cards.bank.length) {
+      if (Number.isNaN(this.bankIndex) || this.bankIndex < 0 || this.bankIndex >= this.cards.bank.length) {
         Toast.show({ text: '口座情報が見つかりません' })
         this.$router.push('/')
         return

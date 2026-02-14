@@ -187,11 +187,11 @@ v-card(
         this.$router.push('/')
         return
       }
-      
-      this.cardIndex = parseInt(indexParam)
-      
+
+      this.cardIndex = Number.parseInt(indexParam)
+
       // Check if the index is valid
-      if (isNaN(this.cardIndex) || this.cardIndex < 0 || this.cardIndex >= this.cards.cards.length) {
+      if (Number.isNaN(this.cardIndex) || this.cardIndex < 0 || this.cardIndex >= this.cards.cards.length) {
         Toast.show({ text: 'カード情報が見つかりません' })
         this.$router.push('/')
         return
