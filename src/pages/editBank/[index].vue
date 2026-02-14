@@ -235,7 +235,15 @@ v-card(
     },
     async mounted () {
       // Get the bank index from route params
-      this.bankIndex = parseInt(this.$route.params.index as string)
+      const params: any = this.$route.params
+      const indexParam = params.index as string | undefined
+      if (!indexParam) {
+        Toast.show({ text: '口座情報が見つかりません' })
+        this.$router.push('/')
+        return
+      }
+      
+      this.bankIndex = parseInt(indexParam)
       
       // Check if the index is valid
       if (isNaN(this.bankIndex) || this.bankIndex < 0 || this.bankIndex >= this.cards.bank.length) {
@@ -246,17 +254,19 @@ v-card(
 
       // Load the existing bank data
       const bank = this.cards.bank[this.bankIndex]
-      this.editCard = {
-        name: bank.name,
-        bankCode: bank.bankCode,
-        bankName: bank.bankName,
-        shopCode: bank.shopCode,
-        shopName: bank.shopName,
-        type: bank.type,
-        cardNumber: bank.cardNumber,
-        ownName: bank.ownName,
-        memo: bank.memo,
-        color: bank.color,
+      if (bank) {
+        this.editCard = {
+          name: bank.name,
+          bankCode: bank.bankCode,
+          bankName: bank.bankName,
+          shopCode: bank.shopCode,
+          shopName: bank.shopName,
+          type: bank.type,
+          cardNumber: bank.cardNumber,
+          ownName: bank.ownName,
+          memo: bank.memo,
+          color: bank.color,
+        }
       }
 
       App.addListener('backButton', () => {

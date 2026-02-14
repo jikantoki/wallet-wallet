@@ -180,7 +180,15 @@ v-card(
     },
     async mounted () {
       // Get the card index from route params
-      this.cardIndex = parseInt(this.$route.params.index as string)
+      const params: any = this.$route.params
+      const indexParam = params.index as string | undefined
+      if (!indexParam) {
+        Toast.show({ text: 'カード情報が見つかりません' })
+        this.$router.push('/')
+        return
+      }
+      
+      this.cardIndex = parseInt(indexParam)
       
       // Check if the index is valid
       if (isNaN(this.cardIndex) || this.cardIndex < 0 || this.cardIndex >= this.cards.cards.length) {
@@ -191,17 +199,19 @@ v-card(
 
       // Load the existing card data
       const card = this.cards.cards[this.cardIndex]
-      this.editCard = {
-        name: card.name,
-        cardNumber: card.cardNumber,
-        deadlineYYYY: card.deadlineYYYY,
-        deadlineMM: card.deadlineMM,
-        cvc: card.cvc,
-        ownName: card.ownName,
-        memo: card.memo,
-        color: card.color,
+      if (card) {
+        this.editCard = {
+          name: card.name,
+          cardNumber: card.cardNumber,
+          deadlineYYYY: card.deadlineYYYY,
+          deadlineMM: card.deadlineMM,
+          cvc: card.cvc,
+          ownName: card.ownName,
+          memo: card.memo,
+          color: card.color,
+        }
+        this.originalCardNumber = card.cardNumber
       }
-      this.originalCardNumber = card.cardNumber
 
       App.addListener('backButton', () => {
         this.$router.back()
