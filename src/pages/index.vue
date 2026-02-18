@@ -264,7 +264,7 @@ v-card(
             .icon-and-text
               v-icon mdi-information
               v-list-item-title このアプリについて
-          v-list-item.item( @click="share('https://play.google.com/store/apps/dev?id=8940000495375956936', 'エノキ電気')" )
+          v-list-item.item( @click="share('https://play.google.com/store/apps/details?id=xyz.enoki.wallet', 'Wallet Wallet')" )
             .icon-and-text
               v-icon mdi-share-variant
               v-list-item-title このアプリを共有する
