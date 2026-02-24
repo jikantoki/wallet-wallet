@@ -68,6 +68,19 @@ v-card(
         .text
           p 新しい銀行口座を登録
           p.opacity05 ここをクリックして、新しい銀行口座を追加します
+    .settings-list.my-4(
+      v-if="cards.cards.length === 0 && cards.bank.length === 0"
+    )
+      .setting-item(
+        @click="$router.push('/tutorial')"
+        v-ripple
+        style="background-color: rgba(var(--v-theme-primary), 0.1);"
+      )
+        .icon(style="background-color: rgba(var(--v-theme-primary), 0.2);")
+          v-icon(color="primary") mdi-school
+        .text
+          p チュートリアルを開く
+          p.opacity05 初めての方はこちら
     .ma-16.pa-16
   //-- 下部のアクションバー --
   .action-bar
@@ -240,6 +253,10 @@ v-card(
             .icon-and-text
               v-icon mdi-account-multiple
               v-list-item-title 友達リスト
+          v-list-item.item( @click="openTutorial" )
+            .icon-and-text
+              v-icon mdi-school
+              v-list-item-title チュートリアルを表示
           v-list-item.item( @click="$router.push('/settings')" )
             .icon-and-text
               v-icon mdi-cog
@@ -979,6 +996,11 @@ v-card(
           Toast.show({ text: '生体認証に失敗しました' })
           return false
         }
+      },
+      /** チュートリアル画面へ移動 */
+      openTutorial () {
+        this.optionsDialog = false
+        this.$router.push('/tutorial')
       },
     },
   }
