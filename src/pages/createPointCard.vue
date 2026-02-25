@@ -121,6 +121,7 @@ v-card(
         .qrcode-stream(style="background-color: white; position: relative;")
           QrcodeStream(
             @detect="onScanDetect"
+            :formats="['qr_code', 'linear_codes']"
             style="position: absolute;"
             )
           .scan-wrap(
