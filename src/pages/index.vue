@@ -8,6 +8,14 @@ v-card(
       p Wallet Wallet
     v-spacer
   v-card-text(style="height: inherit; overflow-y: auto;")
+    v-switch(
+      v-model="settings.display.showCardNumberHint"
+      label="カード番号のヒントを表示"
+      inset
+      color="primary"
+      hide-details
+      class="mx-2"
+    )
     h2 クレジットカード（{{ cards.cards.length }}枚）
     .settings-list.my-4(
       v-for="(card, cnt) of cards.cards"
@@ -23,7 +31,7 @@ v-card(
           h3(
             style="font-size: 1.2em;"
           ) {{ card.name }}
-          p {{ searchBrand(card.cardNumber) ?? '不明なブランド' }} ******{{ card.cardNumber.slice(-4) }}
+          p {{ searchBrand(card.cardNumber) ?? '不明なブランド' }} {{ settings.display.showCardNumberHint ? `******${card.cardNumber.slice(-4)}` : '' }}
           p.opacity05(
             style="min-height: 1em;"
             ) {{ card.memo.length ? card.memo : '空白のメモ' }}
@@ -53,7 +61,7 @@ v-card(
           h3(
             style="font-size: 1.2em;"
           ) {{ card.name }}
-          p {{ card.bankName }} {{ card.shopName }} ****{{ card.cardNumber.slice(-3) }}
+          p {{ card.bankName }} {{ card.shopName }} {{ settings.display.showCardNumberHint ? `****${card.cardNumber.slice(-3)}` : '' }}
           p.opacity05(
             style="min-height: 1em;"
             ) {{ card.memo.length ? card.memo : '空白のメモ' }}
