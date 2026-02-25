@@ -23,10 +23,12 @@ declare module 'vue-router/auto-routes' {
     '/about': RouteRecordInfo<'/about', '/about', Record<never, never>, Record<never, never>>,
     '/create': RouteRecordInfo<'/create', '/create', Record<never, never>, Record<never, never>>,
     '/createBank': RouteRecordInfo<'/createBank', '/createBank', Record<never, never>, Record<never, never>>,
+    '/createPointCard': RouteRecordInfo<'/createPointCard', '/createPointCard', Record<never, never>, Record<never, never>>,
     '/data-export': RouteRecordInfo<'/data-export', '/data-export', Record<never, never>, Record<never, never>>,
     '/data-import': RouteRecordInfo<'/data-import', '/data-import', Record<never, never>, Record<never, never>>,
     '/edit/[index]': RouteRecordInfo<'/edit/[index]', '/edit/:index', { index: ParamValue<true> }, { index: ParamValue<false> }>,
     '/editBank/[index]': RouteRecordInfo<'/editBank/[index]', '/editBank/:index', { index: ParamValue<true> }, { index: ParamValue<false> }>,
+    '/editPointCard/[index]': RouteRecordInfo<'/editPointCard/[index]', '/editPointCard/:index', { index: ParamValue<true> }, { index: ParamValue<false> }>,
     '/friendlist': RouteRecordInfo<'/friendlist', '/friendlist', Record<never, never>, Record<never, never>>,
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
     '/password_reset': RouteRecordInfo<'/password_reset', '/password_reset', Record<never, never>, Record<never, never>>,
@@ -72,6 +74,10 @@ declare module 'vue-router/auto-routes' {
       routes: '/createBank'
       views: never
     }
+    'src/pages/createPointCard.vue': {
+      routes: '/createPointCard'
+      views: never
+    }
     'src/pages/data-export.vue': {
       routes: '/data-export'
       views: never
@@ -86,6 +92,10 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/editBank/[index].vue': {
       routes: '/editBank/[index]'
+      views: never
+    }
+    'src/pages/editPointCard/[index].vue': {
+      routes: '/editPointCard/[index]'
       views: never
     }
     'src/pages/friendlist.vue': {

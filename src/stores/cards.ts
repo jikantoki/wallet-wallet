@@ -51,10 +51,27 @@ export type Bank = {
   color: string
 }
 
+/** ポイントカードの構造 */
+export type PointCard = {
+  /** カード名 */
+  name: string
+  /** カードデータ（カード番号など） */
+  cardData: string
+  /** QRコードかバーコードか */
+  codeType: 'qr' | 'barcode'
+  /** カード名義人 */
+  ownName: string
+  /** 何かメモする事項があれば */
+  memo: string | null
+  /** 色 */
+  color: string
+}
+
 export const useCardsStore = defineStore('cards', {
   state: () => ({
     cards: [] as Card[],
     bank: [] as Bank[],
+    pointCards: [] as PointCard[],
   }),
   persist: {
     key: 'card-data',
