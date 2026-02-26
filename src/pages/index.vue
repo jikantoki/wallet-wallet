@@ -76,6 +76,37 @@ v-card(
         .text
           p 新しい銀行口座を登録
           p.opacity05 ここをクリックして、新しい銀行口座を追加します
+    h2 ポイントカード（{{ cards.pointCards.length }}枚）
+    .settings-list.my-4(
+      v-for="(card, cnt) of cards.pointCards"
+      )
+      .setting-item(
+        @click="openPointCard(cnt)"
+        v-ripple
+        :style="`background-color: ${card.color}bb;`"
+        )
+        .icon
+          v-icon(v-if="card.codeType === 'qr'") mdi-qrcode
+          v-icon(v-else) mdi-barcode
+        .text
+          h3(
+            style="font-size: 1.2em;"
+            ) {{ card.name }}
+          p {{ card.cardData }}
+          p.opacity05(
+            style="min-height: 1em;"
+            ) {{ card.memo && card.memo.length ? card.memo : '空白のメモ' }}
+    .settings-list.my-4(
+    )
+      .setting-item(
+        @click="$router.push('/createPointCard')"
+        v-ripple
+      )
+        .icon
+          v-icon mdi-plus
+        .text
+          p 新しいポイントカードを登録
+          p.opacity05 ここをクリックして、新しいポイントカードを追加します
     .settings-list.my-4(
       v-if="cards.cards.length === 0 && cards.bank.length === 0"
     )
@@ -526,6 +557,15 @@ v-card(
             .text
               p 銀行口座
               p.opacity05 7桁の口座番号と、銀行名/支店名が必要です
+          .setting-item(
+            @click="$router.push('/createPointCard')"
+            v-ripple
+          )
+            .icon
+              v-icon mdi-card-account-details
+            .text
+              p ポイントカード
+              p.opacity05 QRコードまたはバーコードのカードデータが必要です
       v-card-actions
         v-btn(
           prepend-icon="mdi-close"
@@ -608,6 +648,105 @@ v-card(
           @click="deleteCard"
           style="background-color: var(--color-error); color: white;"
         ) 削除
+  //-- ポイントカード詳細ダイアログ --
+  v-dialog(
+    v-model="detailPointCardDialog"
+    )
+    v-card(
+      v-for="card in [cards.pointCards[detailPointCardDialogTarget]]"
+      width="100%"
+      )
+      v-card-title ポイントカード情報
+      v-card-text
+        v-text-field(
+          v-model="card.name"
+          label="カード名"
+          prepend-inner-icon="mdi-tag"
+          readonly
+          )
+          template(v-slot:append-inner)
+            v-icon(@click.stop="copy(card.name)") mdi-content-copy
+        v-text-field(
+          v-model="card.cardData"
+          label="カードデータ"
+          prepend-inner-icon="mdi-barcode"
+          readonly
+          )
+          template(v-slot:append-inner)
+            v-icon(@click.stop="copy(card.cardData)") mdi-content-copy
+        v-text-field(
+          v-model="card.ownName"
+          label="名義"
+          prepend-inner-icon="mdi-account"
+          readonly
+          )
+          template(v-slot:append-inner)
+            v-icon(@click.stop="copy(card.ownName)") mdi-content-copy
+        v-text-field(
+          v-model="card.memo"
+          label="メモ"
+          prepend-inner-icon="mdi-note-outline"
+          readonly
+          )
+          template(v-slot:append-inner)
+            v-icon(@click.stop="copy(card.memo)") mdi-content-copy
+        .code-display.my-4(style="display: flex; justify-content: center;")
+          canvas(
+            :id="`point-card-canvas-${detailPointCardDialogTarget}`"
+            style="max-width: 100%;"
+            )
+      v-card-actions
+        v-btn(
+          prepend-icon="mdi-pencil"
+          style="background-color: rgb(var(--v-theme-secondary)); color: white;"
+          @click="editPointCard(detailPointCardDialogTarget)"
+          ) 編集
+        v-btn(
+          prepend-icon="mdi-trash-can"
+          style="background-color: var(--color-error); color: white;"
+          @click="deletePointCardDialog = true"
+          ) 削除
+        v-btn(
+          prepend-icon="mdi-close"
+          style="background-color: rgb(var(--v-theme-primary)); color: white;"
+          @click="detailPointCardDialog = false"
+          ) 閉じる
+  //-- ポイントカード削除確認ダイアログ --
+  v-dialog(
+    v-model="deletePointCardDialog"
+    )
+    v-card(
+      v-for="card in [cards.pointCards[detailPointCardDialogTarget]]"
+      width="100%"
+      )
+      v-card-title 削除
+      v-card-text
+        p 以下の情報を削除しますか？
+        table.my-4(
+          border="1"
+          style="width: 100%; border-collapse: collapse;"
+          )
+          tbody
+            tr
+              th.pa-2 カード名
+              td.pa-2 {{ card.name }}
+            tr
+              th.pa-2 カードデータ
+              td.pa-2 {{ card.cardData }}
+            tr
+              th.pa-2 メモ
+              td.pa-2 {{ card.memo }}
+      v-card-actions
+        v-btn(
+          prepend-icon="mdi-close"
+          @click="deletePointCardDialog = false"
+          style="background-color: rgb(var(--v-theme-primary)); color: white;"
+          ) キャンセル
+        v-btn(
+          prepend-icon="mdi-trash-can"
+          @click="deletePointCard"
+          style="background-color: var(--color-error); color: white;"
+          ) 削除
 </template>
 
 <script lang="ts">
@@ -618,6 +757,8 @@ v-card(
   import { Clipboard } from '@capacitor/clipboard'
   import { Share } from '@capacitor/share'
   import { Toast } from '@capacitor/toast'
+  import JsBarcode from 'jsbarcode'
+  import QRCode from 'qrcode'
   // @ts-ignore
   import zenginCode from 'zengin-code'
   // @ts-ignore
@@ -670,6 +811,11 @@ v-card(
         deleteDialog: false,
         /** 銀行口座削除確認ダイアログ */
         deleteBankDialog: false,
+        /** ポイントカード詳細ダイアログ */
+        detailPointCardDialog: false,
+        detailPointCardDialogTarget: null as number | null,
+        /** ポイントカード削除確認ダイアログ */
+        deletePointCardDialog: false,
       }
     },
     computed: {
@@ -770,6 +916,12 @@ v-card(
         } else if (this.deleteBankDialog) {
           /** 削除ダイアログを閉じる */
           this.deleteBankDialog = false
+        } else if (this.detailPointCardDialog) {
+          /** ポイントカード詳細ダイアログを閉じる */
+          this.detailPointCardDialog = false
+        } else if (this.deletePointCardDialog) {
+          /** ポイントカード削除ダイアログを閉じる */
+          this.deletePointCardDialog = false
         } else if (this.createTypeSelectDialog) {
           /** どの種類のカードを登録する？のダイアログを閉じる */
           this.createTypeSelectDialog = false
@@ -973,6 +1125,58 @@ v-card(
         if (authResult) {
           this.detailDialogTarget = index
           this.detailDialog = true
+          return true
+        } else {
+          Toast.show({ text: '生体認証に失敗しました' })
+          return false
+        }
+      },
+      deletePointCard () {
+        this.deletePointCardDialog = false
+        this.detailPointCardDialog = false
+        // ここは0.5秒以上遅延させないとバグる
+        setTimeout(() => {
+          if (this.detailPointCardDialogTarget === null) {
+            return null
+          }
+          this.cards.pointCards.splice(this.detailPointCardDialogTarget, 1)
+        }, 500)
+      },
+      editPointCard (index: number) {
+        this.$router.push(`/editPointCard/${index}`)
+      },
+      async openPointCard (index: number) {
+        const authResult = await this.auth()
+        if (authResult) {
+          this.detailPointCardDialogTarget = index
+          this.detailPointCardDialog = true
+          const card = this.cards.pointCards[index]
+          if (!card || !card.cardData) {
+            return true
+          }
+          // カードデータからQRコードまたはバーコードを生成
+          setTimeout(async () => {
+            const canvasId = `point-card-canvas-${index}`
+            const canvas = document.querySelector(`#${canvasId}`) as HTMLCanvasElement
+            if (!canvas) {
+              return
+            }
+            if (card.codeType === 'barcode') {
+              try {
+                JsBarcode(canvas, card.cardData, {
+                  format: 'CODE128',
+                  width: 2,
+                  height: 100,
+                  displayValue: true,
+                })
+              } catch {
+                // バーコード生成失敗時はQRコードにフォールバック
+                await QRCode.toCanvas(canvas, card.cardData, { scale: 6 })
+              }
+            } else {
+              await QRCode.toCanvas(canvas, card.cardData, { scale: 6 })
+            }
+          }, 300)
           return true
         } else {
           Toast.show({ text: '生体認証に失敗しました' })
