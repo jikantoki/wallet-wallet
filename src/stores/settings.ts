@@ -8,6 +8,8 @@ export const useSettingsStore = defineStore('settings', {
       theme: 'system' as 'system' | 'light' | 'dark',
       /** 言語 */
       language: '日本語' as const,
+      /** カード番号のヒント（下4桁・下3桁）を表示するか */
+      showCardNumberHint: true,
     },
     /** 通知設定 */
     notification: {},
