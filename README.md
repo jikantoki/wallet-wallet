@@ -4,7 +4,7 @@
 
 <img src="./thumbnail.jpg" width="512px" alt="アイコン">
 
-- 🌐 ホームページ: <https://wallet.enoki.xyz>
+- 🌐 Google Play Store: <https://play.google.com/store/apps/details?id=xyz.enoki.wallet>
 - 📱 最新版 Android APK: [ダウンロード](https://raw.githubusercontent.com/jikantoki/wallet-wallet/refs/heads/main/app-release.apk)
 
 ## 概要
